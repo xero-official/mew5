@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <!--- <b-modal
     ref="mewConnect"
     :title="$t('accessWallet.mewConnectTitle')"
     hide-footer
@@ -43,8 +43,7 @@
       </div>
       <customer-support />
     </div>
-    <!-- .modal-container -->
-  </b-modal>
+  </b-modal> --->
 </template>
 
 <script>

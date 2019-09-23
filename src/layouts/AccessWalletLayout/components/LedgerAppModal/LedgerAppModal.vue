@@ -122,7 +122,7 @@ import cust from '@/assets/images/icons/network.svg';
 import { Toast, pathHelpers } from '@/helpers';
 import { LedgerWallet } from '@/wallets';
 import { mapState } from 'vuex';
-import { ethereum } from '@/wallets/bip44/paths';
+import { xerom } from '@/wallets/bip44/paths';
 export default {
   props: {
     networks: {
@@ -206,8 +206,8 @@ export default {
       const customApp = {
         paths: [
           {
-            label: 'Ethereum (Trezor)',
-            path: ethereum.path,
+            label: 'XEROM (Trezor)',
+            path: xerom.path,
             default: true
           },
           {

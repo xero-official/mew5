@@ -5,10 +5,6 @@
       :networks="Networks"
       @hardwareWalletOpen="hardwareWalletOpen"
     />
-    <mew-connect-modal
-      ref="mewconnectModal"
-      :network-and-address-open="networkAndAddressOpen"
-    />
 
     <hardware-modal
       ref="hardwareModal"
@@ -150,17 +146,6 @@ export default {
       walletConstructor: function() {},
       hardwareBrand: '',
       buttons: [
-        {
-          func: this.mewConnectModalOpen,
-          title: this.$t('common.mewConnect'),
-          desc: this.$t('accessWallet.mewConnectDesc'),
-          recommend: '',
-          tooltip: '',
-          img: mewConnectImg,
-          imgDisabled: mewConnectImgDisabled,
-          disabled: false,
-          classname: 'button-mewconnect'
-        },
         {
           func: this.hardwareModalOpen,
           title: this.$t('common.hardware'),
