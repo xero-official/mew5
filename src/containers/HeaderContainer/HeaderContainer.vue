@@ -49,12 +49,6 @@
         ]"
         class="fixed-header"
       >
-        <div v-if="$route.fullPath === '/'" class="vintage-header">
-          Missing the vintage MEW?
-          <a rel="noopener noreferrer" href="https://vintage.myetherwallet.com"
-            >Click here to go back!</a
-          >
-        </div>
         <div
           :class="[
             (isMobileMenuOpen || !isPageOnTop) && 'mobile-menu-boxshadow',
@@ -80,31 +74,11 @@
             <div class="top-menu">
               <b-nav>
                 <b-nav-item
-                  href="https://ccswap.myetherwallet.com/#/"
-                  target="_blank"
-                  class="buy-eth"
-                >
-                  <img
-                    class="buy-eth-icon"
-                    src="@/assets/images/icons/buy-eth.svg"
-                  />
-                  Buy ETH
-                </b-nav-item>
-                <b-nav-item
                   v-if="isHomePage"
                   to="/"
                   exact
                   @click="scrollTop()"
                   >{{ $t('header.home') }}</b-nav-item
-                >
-                <b-nav-item v-if="isHomePage" to="/#about-mew">
-                  {{ $t('header.about') }}
-                </b-nav-item>
-                <b-nav-item-dropdown
-                  v-if="address !== null"
-                  right
-                  no-caret
-                  class="tx-history-menu"
                 >
                   <template slot="button-content">
                     <p>Transaction History</p>
@@ -120,7 +94,6 @@
                     >Ethplorer (Tokens)</b-dropdown-item
                   >
                 </b-nav-item-dropdown>
-                <b-nav-item to="/#faqs">{{ $t('common.faqs') }}</b-nav-item>
                 <div class="language-menu-container">
                   <div class="arrows">
                     <i class="fa fa-angle-down" aria-hidden="true" />
