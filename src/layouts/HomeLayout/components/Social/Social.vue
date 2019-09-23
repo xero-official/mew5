@@ -50,7 +50,7 @@ export default {
         },
         {
           img: github,
-          to: 'https://www.github.com/myetherwallet',
+          to: 'https://github.com/xero-official',
           name: 'github'
         }
       ]

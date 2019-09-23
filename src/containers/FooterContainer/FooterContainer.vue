@@ -43,33 +43,25 @@
           <div class="donate-us">
             <div class="content-title">
               <h3 class="lite">
-                {{ $t('footer.love') }}
-                <img src="~@/assets/images/icons/heart.svg" />
                 {{ $t('footer.donate') }}
               </h3>
             </div>
             <div class="links">
               <p>{{ $t('footer.welcomeDes') }}</p>
 
-              <a
-                :href="'https://etherscan.io/address/' + ethDonationAddress"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
                 <p :data-eth="ethDonationAddress" class="crypto-link">
-                  <img src="~@/assets/images/icons/eth.svg" /> &nbsp;Ethereum
+                  &nbsp;Ethereum / Xerom / Any Ethash coin -
                   Donation
                 </p>
-              </a>
 
               <a
-                href="https://blockchain.info/address/1DECAF2uSpFTP4L1fAHR8GCLrPqdwdLse9"
+                href="https://blockchain.info/address/1ucuBe2hAhWWj5bVcDKVBsYaT37wdcd1n"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <p
                   class="crypto-link no-padding"
-                  data-btc="1DECAF2uSpFTP4L1fAHR8GCLrPqdwdLse9"
+                  data-btc="1ucuBe2hAhWWj5bVcDKVBsYaT37wdcd1n"
                 >
                   <img src="~@/assets/images/icons/btc.svg" /> &nbsp;Bitcoin
                   Donation
@@ -96,14 +88,6 @@
           </div>
           <div class="copyright">
             <p>
-              {{ $t('footer.pricingP') }}
-              <a
-                href="https://coingecko.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                >CoinGecko</a
-              >
-              <br />
               {{ $t('footer.copyright') }}
             </p>
           </div>
@@ -178,15 +162,15 @@ export default {
       ],
       links: [
         {
-          to: 'https://www.twitter.com/@myetherwallet',
+          to: 'https://twitter.com/XeromOfficial',
           class: 'fa-twitter'
         },
         {
-          to: 'https://www.github.com/myetherwallet',
+          to: 'https://github.com/xero-official',
           class: 'fa-github'
         },
         {
-          to: 'https://www.medium.com/@myetherwallet',
+          to: 'https://medium.com/@Ether1Official',
           class: 'fa-medium'
         }
       ]
