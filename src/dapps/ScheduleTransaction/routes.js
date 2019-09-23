@@ -5,7 +5,7 @@ import ScheduleView from './containers/ScheduleView';
 export default {
   path: 'dapps/schedule-transaction',
   component: ScheduleTransaction,
-  props: true,
+  props: false,
   children: [
     {
       path: '',
