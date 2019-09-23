@@ -143,6 +143,10 @@ const lightstreamsNetwork = {
   path: "m/44'/60'/0'",
   label: 'Lightstreams Network'
 };
+const xerom = {
+  path: "m/44'/1313500'/0'/0",
+  label: 'Xerom'
+};
 export {
   ethereum,
   ethereumClassic,
@@ -179,5 +183,6 @@ export {
   poaNetwork,
   reoscChain,
   dexon,
-  lightstreamsNetwork
+  lightstreamsNetwork,
+  xerom
 };

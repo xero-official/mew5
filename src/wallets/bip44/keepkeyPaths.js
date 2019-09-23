@@ -23,7 +23,8 @@ import {
   thundercore,
   solidum,
   dexon,
-  lightstreamsNetwork
+  lightstreamsNetwork,
+  xerom
 } from './paths';
 export default [
   keepkeyEthereum,
@@ -50,5 +51,6 @@ export default [
   thundercore,
   solidum,
   dexon,
-  lightstreamsNetwork
+  lightstreamsNetwork,
+  xerom
 ];
