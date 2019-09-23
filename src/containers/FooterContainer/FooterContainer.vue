@@ -36,17 +36,6 @@
                   >
                     <p>{{ content.text }}</p>
                   </router-link>
-                  <a
-                    v-else-if="content.to === undefined"
-                    :href="content.href"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <p v-if="item.class === 'e2'">
-                      {{ $t(`${content.text}`) }}
-                    </p>
-                    <p v-else>{{ content.text }}</p>
-                  </a>
                 </div>
               </div>
             </div>
@@ -153,15 +142,7 @@ export default {
       lowerLinks: [
         {
           title: this.$t('footer.feedback'),
-          href: 'mailto:support@myetherwallet.com'
-        },
-        {
-          title: this.$t('footer.privacy'),
-          to: '/privacy-policy'
-        },
-        {
-          title: this.$t('common.terms'),
-          to: '/terms-and-conditions'
+          href: 'mailto:ethan@ether1.org'
         },
         {
           title: `v${version}`,
@@ -176,27 +157,6 @@ export default {
             {
               text: this.$t('footer.units'),
               to: '/convert-units'
-            },
-            // {
-            //   text: this.$t('footer.advanced'),
-            //   to: '/advanced-tools'
-            // },
-            {
-              text: this.$t('footer.extension'),
-              href:
-                'https://chrome.google.com/webstore/detail/myetherwallet/nlbmnnijcnlegkjjpcfjclmcfggfefdm?hl=en'
-            },
-            {
-              text: 'Buy a Hardware wallet',
-              to: '/hardware-wallet-affiliates'
-            },
-            {
-              text: this.$t('footer.sendOffline'),
-              to: '/send-offline-helper'
-            },
-            {
-              text: this.$t('footer.verifyMessage'),
-              to: '/verify-message'
             }
           ]
         },
@@ -210,60 +170,20 @@ export default {
           title: this.$t('footer.mew'),
           contents: [
             {
-              text: this.$t('footer.about'),
-              to: '/#about-mew'
-            },
-            {
-              text: this.$t('footer.team'),
-              to: '/team'
-            },
-            {
-              text: this.$t('common.faqs'),
-              to: '/#faqs'
-            },
-            {
-              text: 'MEWtopia',
-              href: 'https://www.mewtopia.com'
-            },
-            {
-              text: this.$t('common.vintage'),
-              href: 'https://vintage.myetherwallet.com'
-            },
-            {
               text: this.$t('common.customerSupport'),
-              href: 'mailto:support@myetherwallet.com'
-            },
-            {
-              text: 'Help Center',
-              href: 'https://kb.myetherwallet.com'
+              href: 'mailto:admin@xerom.org'
             }
           ]
         }
       ],
       links: [
         {
-          to: 'https://www.facebook.com/myetherwallet',
-          class: 'fa-facebook'
-        },
-        {
           to: 'https://www.twitter.com/@myetherwallet',
           class: 'fa-twitter'
         },
         {
-          to: 'https://www.instagram.com/myetherwallet',
-          class: 'fa-instagram'
-        },
-        {
-          to: 'https://www.linkedin.com/company/myetherwallet',
-          class: 'fa-linkedin'
-        },
-        {
           to: 'https://www.github.com/myetherwallet',
           class: 'fa-github'
-        },
-        {
-          to: 'https://www.reddit.com/r/myetherwallet',
-          class: 'fa-reddit-alien'
         },
         {
           to: 'https://www.medium.com/@myetherwallet',
