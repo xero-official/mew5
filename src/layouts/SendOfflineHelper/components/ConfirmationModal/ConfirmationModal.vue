@@ -103,7 +103,7 @@ export default {
       buttonConfirmAndSend: {
         title: 'Confirm & Send',
         buttonStyle: 'green',
-        helpCenter: true
+        helpCenter: false
       }
     };
   },
