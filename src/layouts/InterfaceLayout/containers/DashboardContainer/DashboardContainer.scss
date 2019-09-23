@@ -11,7 +11,7 @@ $actionsSwapCollepsePoint: 700px;
 
 .container--flex {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   grid-gap: 15px;
 
   @media all and (max-width: $actionsSwapCollepsePoint) {
