@@ -39,11 +39,6 @@ export default {
     return {
       links: [
         {
-          img: facebook,
-          to: 'https://www.facebook.com/MyEtherWallet',
-          name: 'Facebook'
-        },
-        {
           img: twitter,
           to: 'https://twitter.com/myetherwallet',
           name: 'Twitter'
@@ -52,11 +47,6 @@ export default {
           img: medium,
           to: 'https://medium.com/@myetherwallet',
           name: 'Medium'
-        },
-        {
-          img: reddit,
-          to: 'https://www.reddit.com/r/myetherwallet',
-          name: 'reddit'
         },
         {
           img: github,
