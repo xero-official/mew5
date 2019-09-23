@@ -1,5 +1,5 @@
 <template>
-  <div class="faqs">
+  <!---<div class="faqs">
     <div id="faqs" class="wrap">
       <div class="page-container">
         <div class="flex-col-vertical-bottom top-title">
@@ -60,7 +60,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>--->
 </template>
 
 <script>

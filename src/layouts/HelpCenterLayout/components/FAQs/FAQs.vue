@@ -8,7 +8,7 @@
               <h3>Balances not loading or showing on MyEtherWallet</h3>
               <div class="show-more-buttons">
                 <span v-if="showFAQs.faq1 == false" class="show-more">+</span>
-                <span v-if="showFAQs.faq1 == true" class="show-less">-</span>
+                <span v-if="showFAQs.faq1 == false" class="show-less">-</span>
               </div>
             </div>
             <div v-if="showFAQs.faq1" class="qa__contents--content">
