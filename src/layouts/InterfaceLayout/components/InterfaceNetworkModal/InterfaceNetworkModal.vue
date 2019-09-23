@@ -291,8 +291,8 @@ export default {
   data() {
     return {
       types: networkTypes,
-      selectedNetworkName: 'ETH',
-      chainID: networkTypes['ETH'].chainID,
+      selectedNetworkName: 'XERO',
+      chainID: networkTypes['XERO'].chainID,
       port: 443,
       name: '',
       url: '',
@@ -330,7 +330,7 @@ export default {
       homePage: '',
       blockExplorerTX: '',
       blockExplorerAddr: '',
-      chainID: networkTypes['ETH'].chainID,
+      chainID: networkTypes['XERO'].chainID,
       tokens: [],
       contracts: [],
       currencyName: 'CUS'
@@ -347,7 +347,7 @@ export default {
         if (this.customNetworks.length > 0) {
           this.switchNetwork(this.customNetworks[0]);
         } else {
-          this.switchNetwork(this.Networks.ETH[0]);
+          this.switchNetwork(this.Networks.XERO[0]);
         }
       }
       store.set('customNetworks', this.customNetworks);

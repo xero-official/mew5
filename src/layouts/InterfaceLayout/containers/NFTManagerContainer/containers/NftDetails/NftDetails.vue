@@ -75,7 +75,7 @@ export default {
       sendButton: {
         title: this.$t('interface.send'),
         buttonStyle: 'green',
-        helpCenter: true,
+        helpCenter: false,
         noMinWidth: true,
         fullWidth: true
       }

@@ -50,8 +50,8 @@ export default {
             inactive: ''
           },
           titleKey: 'common.offline'
-        },
-        {
+        }
+        /*{
           name: 'nft-manager',
           onlineOnly: true,
           routes: ['/interface/nft-manager'],
@@ -60,10 +60,10 @@ export default {
             inactive: ''
           },
           titleKey: 'common.ntfManager'
-        }
+        }*/
       ]
     },
-    {
+    /*{
       name: 'swap',
       onlineOnly: true,
       routes: ['/interface/swap'],
@@ -73,8 +73,8 @@ export default {
       },
       titleKey: 'common.swap',
       children: []
-    },
-    {
+    },*/
+    /*{
       name: 'dapps',
       onlineOnly: true,
       routes: [
@@ -100,7 +100,7 @@ export default {
       },
       titleKey: 'common.dapps',
       children: []
-    },
+    },*/
     {
       name: 'contracts',
       onlineOnly: true,
@@ -133,8 +133,8 @@ export default {
           titleKey: 'common.depContract'
         }
       ]
-    },
-    {
+    }
+    /*{
       name: 'messages',
       onlineOnly: false,
       routes: ['/interface/sign-message', '/interface/verify-message'],
@@ -163,6 +163,6 @@ export default {
           titleKey: 'common.verifyMessage'
         }
       ]
-    }
+    }*/
   ]
 };

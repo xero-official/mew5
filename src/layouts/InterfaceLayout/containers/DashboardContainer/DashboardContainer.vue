@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <div class="container--flex container--top">
       <div class="container--card block--actions">
-        <div class="title">
+        <div class="flex--row--align-center title">
           <h4>{{ $t('common.actions') }}</h4>
         </div>
         <div class="buttons">
@@ -18,7 +18,7 @@
         </div>
       </div>
 
-      <div class="container--card block--swap">
+      <!----<div class="container--card block--swap">
         <div class="flex--row--align-center title">
           <h4>{{ $t('common.swap') }}</h4>
           <button
@@ -53,7 +53,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div>-->
     </div>
 
     <div class="container--card bottom--buttons">
