@@ -48,11 +48,10 @@
             </div>
             <div class="links">
               <p>{{ $t('footer.welcomeDes') }}</p>
-
-                <p :data-eth="ethDonationAddress" class="crypto-link">
-                  &nbsp;Ethereum / Xerom / Any Ethash coin -
-                  Donation
-                </p>
+              <p class="crypto-link">
+                &nbsp;Ethereum / Xerom
+                0xB69B9216B5089Dc3881A4E38f691e9B6943DFA11
+              </p>
 
               <a
                 href="https://blockchain.info/address/1ucuBe2hAhWWj5bVcDKVBsYaT37wdcd1n"

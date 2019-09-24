@@ -1,5 +1,5 @@
 <template>
-  <div class="helpcenter-button">
+  <!---<div class="helpcenter-button">
     <div class="wrap">
       Having issues?
       <a
@@ -9,7 +9,7 @@
         >Help Center</a
       >
     </div>
-  </div>
+  </div>-->
 </template>
 
 <script>
