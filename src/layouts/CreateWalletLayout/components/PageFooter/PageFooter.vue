@@ -1,12 +1,7 @@
 <template>
   <div class="page-footer">
     <div class="wrap">
-      <div class="page-container">
-        <p class="footer-text">
-          {{ $t('createWallet.pageFooterTitle') }}
-          <router-link to="/#faqs">{{ $t('common.faqs') }}</router-link>
-        </p>
-      </div>
+      <div class="page-container"></div>
     </div>
   </div>
 </template>

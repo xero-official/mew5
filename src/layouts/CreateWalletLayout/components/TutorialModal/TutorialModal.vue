@@ -1,5 +1,5 @@
 <template>
-  <b-modal
+  <!---<b-modal
     ref="tutorial"
     hide-footer
     centered
@@ -24,7 +24,7 @@
         {{ $t('common.continue') }}
       </router-link>
     </div>
-  </b-modal>
+  </b-modal>--->
 </template>
 
 <script>

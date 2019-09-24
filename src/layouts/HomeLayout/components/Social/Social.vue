@@ -29,10 +29,8 @@
 
 <script>
 import github from '@/assets/images/icons/github.png';
-import reddit from '@/assets/images/icons/reddit.svg';
 import medium from '@/assets/images/icons/medium.png';
 import twitter from '@/assets/images/icons/twitter.jpg';
-import facebook from '@/assets/images/icons/facebook.png';
 
 export default {
   data() {
@@ -40,12 +38,12 @@ export default {
       links: [
         {
           img: twitter,
-          to: 'https://twitter.com/myetherwallet',
+          to: 'https://twitter.com/XeromOfficial',
           name: 'Twitter'
         },
         {
           img: medium,
-          to: 'https://medium.com/@myetherwallet',
+          to: 'https://medium.com/Ether1Official',
           name: 'Medium'
         },
         {

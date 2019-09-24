@@ -28,9 +28,6 @@
           <p>
             {{ $t('accessWallet.buyHardwareWallet') }}
           </p>
-          <router-link to="/hardware-wallet-affiliates">{{
-            $t('accessWallet.buyHardwareWalletLink')
-          }}</router-link>
         </div>
         <input
           ref="jsonInput"
@@ -47,7 +44,6 @@
           @click.native="continueAccess"
         />
       </div>
-      <customer-support />
     </div>
   </b-modal>
 </template>
