@@ -1,5 +1,7 @@
 <template>
   <div class="header">
+    <decision-tree :button="!isPageOnTop" />
+
     <!-- Modals ***************************************** -->
     <disconnected-modal ref="mewConnectDisconnected" />
     <settings-modal
@@ -57,6 +59,7 @@
         >
           <div class="header-container">
             <router-link
+              aria-label="Home"
               to="/"
               @click.native="
                 scrollTop();
@@ -66,6 +69,7 @@
               <div class="top-logo">
                 <img
                   :class="!isPageOnTop && !isMobileMenuOpen ? 'logo-small' : ''"
+                  alt
                   class="logo-large"
                   src="~@/assets/images/short-hand-logo.png"
                 />
@@ -110,6 +114,7 @@
                           :src="
                             require(`@/assets/images/flags/${currentFlag}.svg`)
                           "
+                          alt
                           class="show"
                         />
                         <p>{{ currentName }}</p>
@@ -204,6 +209,7 @@ import IssueLogModal from '@/components/IssueLogModal';
 import BigNumber from 'bignumber.js';
 import MobileMenu from './components/MobileMenu';
 import DisconnectedModal from '@/components/DisconnectedModal';
+import DecisionTree from '@/components/DecisionTree';
 
 const events = {
   issueModal: 'issueModal',
@@ -221,7 +227,8 @@ export default {
     'issue-log-modal': IssueLogModal,
     'user-reminder-button': UserReminderButton,
     'mobile-menu': MobileMenu,
-    'disconnected-modal': DisconnectedModal
+    'disconnected-modal': DisconnectedModal,
+    'decision-tree': DecisionTree
   },
   data() {
     return {

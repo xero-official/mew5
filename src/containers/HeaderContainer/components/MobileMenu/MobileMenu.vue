@@ -14,6 +14,7 @@
     >
       <router-link
         to="/"
+        aria-label="Home"
         @click.native="
           scrollTop();
           isMenuOpen = false;
@@ -23,7 +24,7 @@
           :class="!isOnTop && !isMenuOpen ? 'small-menu' : ''"
           class="logo-image--container"
         >
-          <img class="logo" src="~@/assets/images/short-hand-logo.png" />
+          <img class="logo" src="~@/assets/images/short-hand-logo.png" alt />
         </div>
       </router-link>
       <div class="mobile-menu-button--container">
@@ -91,6 +92,7 @@
                 <div>{{ currentLang }}</div>
                 <img
                   :src="require(`@/assets/images/flags/${currentFlag}.svg`)"
+                  alt
                 />
               </div>
               <i class="fa fa-angle-right" aria-hidden="true"></i>

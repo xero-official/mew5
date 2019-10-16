@@ -62,7 +62,7 @@
                   class="crypto-link no-padding"
                   data-btc="1ucuBe2hAhWWj5bVcDKVBsYaT37wdcd1n"
                 >
-                  <img src="~@/assets/images/icons/btc.svg" /> &nbsp;Bitcoin
+                  <img src="~@/assets/images/icons/btc.svg" alt /> &nbsp;Bitcoin
                   Donation
                 </p>
               </a>
@@ -95,6 +95,7 @@
               v-for="link in links"
               :href="link.to"
               :key="link.class"
+              :aria-label="link.to"
               rel="noopener noreferrer"
               target="_blank"
             >

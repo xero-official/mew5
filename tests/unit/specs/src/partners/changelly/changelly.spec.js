@@ -1,19 +1,8 @@
 import Changelly from '@/partners/changelly/changelly.js';
-import changellyCalls from '@/partners/changelly/changelly-calls';
-import BigNumber from 'bignumber.js';
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-xdescribe('changelly.js', () => {
-  let changelly;
-  const percentVarianceAllowed = 0.009;
-  beforeAll(() => {
-    changelly = new Changelly({ network: 'ETH' });
-  });
-  it('Expect market rate calculated value to be within 1% of exact value (to ETH)', async () => {
-    const currency = Object.values(changelly.currencies).find(
-      entry => !entry.fixRateEnabled
-    );
-
+describe('changelly.js', () => {
+  xit('testing', async () => {
     const fromCurrency = currency.symbol;
     const toCurrency = 'ETH';
     const fromValue = 100;
@@ -32,7 +21,7 @@ xdescribe('changelly.js', () => {
       .toNumber();
     expect(diff).toBeLessThan(percentVarianceAllowed);
   });
-  it('Expect market rate calculated value to be within 1% of exact value (from ETH) ', async () => {
+  xit('Expect market rate calculated value to be within 1% of exact value (from ETH) ', async () => {
     const currency = Object.values(changelly.currencies).find(
       entry => !entry.fixRateEnabled
     );
@@ -55,7 +44,7 @@ xdescribe('changelly.js', () => {
       .toNumber();
     expect(diff).toBeLessThan(percentVarianceAllowed);
   });
-  it('Expect fixed rate calculated value to be within 1% of exact value (to ETH)', async () => {
+  xit('Expect fixed rate calculated value to be within 1% of exact value (to ETH)', async () => {
     const fromCurrency = 'BTC';
     const toCurrency = 'ETH';
     const fromValue = 0.9;
@@ -75,7 +64,7 @@ xdescribe('changelly.js', () => {
       .toNumber();
     expect(diff).toBeLessThan(percentVarianceAllowed);
   });
-  it('Expect fixed rate calculated value to be within 1% of exact value (from ETH) ', async () => {
+  xit('Expect fixed rate calculated value to be within 1% of exact value (from ETH) ', async () => {
     const fromCurrency = 'ETH';
     const toCurrency = 'BTC';
     const fromValue = 0.9;
