@@ -1,6 +1,7 @@
 <template>
   <div>
     <confirm-modal
+      v-if="wallet !== null"
       ref="confirmModal"
       :confirm-send-tx="sendTx"
       :signed-tx="signedTx"
@@ -15,6 +16,7 @@
       :nonce="nonce"
     />
     <confirm-collection-modal
+      v-if="wallet !== null"
       ref="confirmCollectionModal"
       :send-batch-transactions="sendBatchTransactions"
       :is-hardware-wallet="isHardwareWallet"
@@ -23,6 +25,7 @@
       :sending="sending"
     />
     <confirm-modal
+      v-if="wallet !== null"
       ref="offlineGenerateConfirmModal"
       :confirm-send-tx="generateTx"
       :signed-tx="signedTx"
@@ -37,6 +40,7 @@
       :nonce="nonce"
     />
     <confirm-sign-modal
+      v-if="wallet !== null"
       ref="signConfirmModal"
       :confirm-sign-message="messageReturn"
       :show-success="showSuccessModal"
@@ -50,7 +54,7 @@
       :message="successMessage"
       :link-message="linkMessage"
       :link-to="linkTo"
-      :etherscan-link="etherscanLink"
+      :tx-hash-exlporrer="txHashExlporrer"
     />
     <error-modal
       ref="errorModal"
@@ -58,6 +62,7 @@
       :link-message="linkMessage"
     />
     <swap-widget
+      v-if="wallet !== null"
       ref="swapWidget"
       :supplied-from="swapWigetData['fromCurrency']"
       :supplied-to="swapWigetData['toCurrency']"
@@ -77,7 +82,7 @@ import ConfirmCollectionModal from './components/ConfirmCollectionModal';
 import SuccessModal from './components/SuccessModal';
 import ErrorModal from './components/ErrorModal';
 import ConfirmSignModal from './components/ConfirmSignModal';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { type as noticeTypes } from '@/helpers/notificationFormatters';
 import { WEB3_WALLET, KEEPKEY } from '@/wallets/bip44/walletTypes';
 import { Toast, Misc } from '@/helpers';
@@ -142,7 +147,7 @@ export default {
       successMessage: 'Success',
       linkMessage: 'OK',
       linkTo: '/',
-      etherscanLink: null,
+      txHashExlporrer: '',
       dismissed: true,
       signedArray: [],
       txBatch: null,
@@ -165,10 +170,32 @@ export default {
     };
   },
   computed: {
-    ...mapState(['wallet', 'web3', 'account', 'network']),
+    ...mapState('main', ['wallet', 'web3', 'account', 'network']),
     fromAddress() {
       if (this.account) {
         return this.account.address;
+      }
+      return null;
+    }
+  },
+  watch: {
+    wallet(newVal) {
+      if (newVal !== null) {
+        if (this.$refs.hasOwnProperty('confirmModal')) {
+          this.$refs.confirmModal.$refs.confirmation.$on('hidden', () => {
+            if (this.dismissed) {
+              this.reset();
+            }
+          });
+        }
+        if (this.$refs.hasOwnProperty('signConfirmModal')) {
+          this.$refs.signConfirmModal.$refs.signConfirmation.$on(
+            'hidden',
+            () => {
+              this.signedMessage = '';
+            }
+          );
+        }
       }
     }
   },
@@ -180,9 +207,9 @@ export default {
   created() {
     this.$eventHub.$on(
       'showSuccessModal',
-      (message, linkMessage, etherscanLink) => {
+      (message, linkMessage, txHashExlporrer) => {
         if (!message) message = null;
-        this.showSuccessModal(message, linkMessage, etherscanLink);
+        this.showSuccessModal(message, linkMessage, txHashExlporrer);
       }
     );
 
@@ -281,6 +308,7 @@ export default {
     this.$eventHub.$on('showMessageConfirmModal', (data, resolve) => {
       this.responseFunction = resolve;
       this.messageToSign = data;
+      this.signedMessage = '';
       const signPromise = this.wallet.signMessage(data).then(_response => {
         this.signedMessage = '0x' + _response.toString('hex');
       });
@@ -319,18 +347,21 @@ export default {
     );
   },
   mounted() {
-    this.$refs.confirmModal.$refs.confirmation.$on('hidden', () => {
-      if (this.dismissed) {
-        this.reset();
-      }
-    });
-
     this.$refs.successModal.$refs.success.$on('hide', () => {
       this.successMessage = '';
       this.linkMessage = 'OK';
     });
+
+    if (this.$refs.hasOwnProperty('confirmModal')) {
+      this.$refs.confirmModal.$refs.confirmation.$on('hidden', () => {
+        if (this.dismissed) {
+          this.$eventHub.$emit('emptyPendingToken');
+        }
+      });
+    }
   },
   methods: {
+    ...mapActions('main', ['addNotification']),
     swapWidgetModalOpen(
       destAddress,
       fromCurrency,
@@ -402,11 +433,11 @@ export default {
       window.scrollTo(0, 0);
       this.$refs.signConfirmModal.$refs.signConfirmation.show();
     },
-    showSuccessModal(message, linkMessage, etherscanLink) {
+    showSuccessModal(message, linkMessage, txHashExlporrer) {
       this.reset();
       if (message !== null) this.successMessage = message;
       if (linkMessage !== null) this.linkMessage = linkMessage;
-      if (etherscanLink !== null) this.etherscanLink = etherscanLink;
+      if (txHashExlporrer !== null) this.txHashExlporrer = txHashExlporrer;
       this.$refs.successModal.$refs.success.show();
     },
     showErrorModal(message, linkMessage) {
@@ -464,16 +495,13 @@ export default {
         this.account.identifier === WEB3_WALLET
           ? 'sendTransaction'
           : 'sendSignedTransaction';
-      const _arr =
-        this.account.identifier === WEB3_WALLET
-          ? this.signedArray.reverse()
-          : this.signedArray;
+      const _arr = this.signedArray;
       const promises = _arr.map(tx => {
         const _tx = tx.tx;
         _tx.from = this.account.address;
         const _rawTx = tx.rawTransaction;
         const onError = err => {
-          this.$store.dispatch('addNotification', [
+          this.addNotification([
             noticeTypes.TRANSACTION_ERROR,
             _tx.from,
             this.unSignedArray.find(entry =>
@@ -488,11 +516,11 @@ export default {
         promiEvent.on('error', onError);
         promiEvent.once('transactionHash', hash => {
           this.showSuccessModal(
-            'Transaction sent!',
+            `${this.$t('sendTx.success.sub-title')}`,
             'Okay',
             this.network.type.blockExplorerTX.replace('[[txHash]]', hash)
           );
-          this.$store.dispatch('addNotification', [
+          this.addNotification([
             noticeTypes.TRANSACTION_HASH,
             _tx.from,
             this.unSignedArray.find(entry =>
@@ -511,7 +539,7 @@ export default {
           });
         });
         promiEvent.then(receipt => {
-          this.$store.dispatch('addNotification', [
+          this.addNotification([
             noticeTypes.TRANSACTION_RECEIPT,
             _tx.from,
             this.unSignedArray.find(entry =>
@@ -536,8 +564,8 @@ export default {
 
       if (this.raw.generateOnly) return;
       this.showSuccessModal(
-        'Transaction sent!',
-        'Okay',
+        `${this.$t('sendTx.success.sub-title')}`,
+        `${this.$t('common.okay')}`,
         this.network.type.blockExplorerTX.replace(
           '[[txHash]]',
           this.signedTxObject.tx.hash

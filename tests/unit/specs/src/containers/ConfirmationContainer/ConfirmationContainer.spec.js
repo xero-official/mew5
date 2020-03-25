@@ -8,6 +8,8 @@ import ConfirmCollectionModal from '@/containers/ConfirmationContainer/component
 import VueQrcode from '@xkeshi/vue-qrcode';
 import sinon from 'sinon';
 import Web3 from 'web3';
+import VueX from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
 import { Tooling } from '@@/helpers';
 
@@ -35,7 +37,15 @@ describe('ConfirmationContainer.vue', () => {
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new VueX.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
   });
 
   beforeEach(() => {
@@ -99,7 +109,7 @@ describe('ConfirmationContainer.vue', () => {
         .querySelectorAll('.grid-block')[1]
         .querySelectorAll('p')[1]
         .textContent.trim()
-    ).toEqual(wrapper.vm.$data.gasLimit + ' wei');
+    ).toEqual(wrapper.vm.$data.gasLimit + ' Wei');
   });
 
   it('should render correct gasPrice data', () => {
@@ -110,7 +120,7 @@ describe('ConfirmationContainer.vue', () => {
         .querySelectorAll('.grid-block')[2]
         .querySelectorAll('p')[1]
         .textContent.trim()
-    ).toEqual(wrapper.vm.gasPrice + ' gwei');
+    ).toEqual(wrapper.vm.gasPrice + ' Gwei');
   });
 
   it('should render correct nonce data', () => {

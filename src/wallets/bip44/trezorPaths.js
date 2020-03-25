@@ -23,7 +23,8 @@ import {
   rskMainnet,
   rskTestnet,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  ethercore
 } from './paths';
 export default [
   ethereum,
@@ -50,5 +51,6 @@ export default [
   rskMainnet,
   rskTestnet,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  ethercore
 ];

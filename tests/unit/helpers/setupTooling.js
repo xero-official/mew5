@@ -6,7 +6,7 @@ import veeValidate from 'vee-validate';
 import VueX from 'vuex';
 import VueToast from 'vue-toasted';
 import ClickOutside from '@/directives/ClickOutside';
-import EnsResolver from '@/directives/EnsResolver';
+import AddrResolver from '@/directives/AddrResolver';
 import en_US from '@/translations/en_US';
 import { state, getters } from '@@/helpers/mockStore';
 function createLocalVueInstance() {
@@ -16,7 +16,7 @@ function createLocalVueInstance() {
   localVue.use(VueX);
   localVue.use(VueToast);
   localVue.directive('click-outside', ClickOutside);
-  localVue.directive('ens-resolver', EnsResolver);
+  localVue.directive('addr-resolver', AddrResolver);
   localVue.use(veeValidate);
   localVue.filter('capitalize', function(value) {
     if (!value) return '';
@@ -56,6 +56,11 @@ const RouterLinkStub = {
   props: ['to']
 };
 
+const RouterViewStub = {
+  name: 'router-view',
+  template: '<div class="routerView"><slot></slot></div>'
+};
+
 // likely will remove this function
 // function createShallowMountWrapper(component, suppliedOptions, baseOptions = {}){
 //   if(typeof baseOptions === 'boolean' && baseOptions){
@@ -64,7 +69,7 @@ const RouterLinkStub = {
 //
 //   return shallowMount(component, {baseOptions, ...suppliedOptions});
 // }
-export { RouterLinkStub };
+export { RouterLinkStub, RouterViewStub };
 export default {
   createLocalVueInstance
 };

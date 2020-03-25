@@ -11,8 +11,8 @@
           :class="strengthClass"
           :type="password.showPassword ? 'text' : 'password'"
           :value="value"
+          :placeholder="$t('createWallet.mnemonic.please-enter-9-char')"
           name="password"
-          placeholder="Please Enter At Least 9 Characters"
           autocomplete="off"
           @input="updateValue($event.target.value)"
         />
@@ -36,7 +36,8 @@
       </div>
 
       <p v-show="value.length > 0" class="passwd-strength">
-        Password strength: <span :class="strengthClass">{{ strength }}</span>
+        {{ $t('createWallet.password.password-strength') }}:
+        <span :class="strengthClass">{{ strength }}</span>
       </p>
       <p v-if="value.length > 0" class="passwd-strength">
         {{ errors.first('password') }}

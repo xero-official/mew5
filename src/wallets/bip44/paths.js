@@ -12,7 +12,7 @@ const ethereumClassic = {
 };
 const ropsten = {
   path: "m/44'/1'/0'/0",
-  label: 'Ethereum Testnet (Ropsten)'
+  label: 'Ropsten Testnet'
 };
 const singularDTV = {
   path: "m/0'/0'/0'",
@@ -147,6 +147,14 @@ const xerom = {
   path: "m/44'/1313500'/0'/0",
   label: 'Xerom'
 };
+const mintmeComCoin = {
+  path: "m/44'/227'/0'/0",
+  label: 'MintMe.com Coin'
+};
+const ethercore = {
+  path: "m/44'/466'/0'/0",
+  label: 'EtherCore'
+};
 export {
   ethereum,
   ethereumClassic,
@@ -184,5 +192,7 @@ export {
   reoscChain,
   dexon,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  mintmeComCoin,
+  ethercore
 };

@@ -1,51 +1,33 @@
 <template>
-  <b-modal
-    ref="software"
-    :title="$t('accessWallet.accessBySoftware')"
-    hide-footer
-    class="bootstrap-modal nopadding modal-software"
-    centered
-    static
-    lazy
-  >
-    <div class="warning">
-      <warning-message />
-    </div>
-    <div class="content-block">
-      <div class="d-block content-container text-center">
-        <div class="button-options">
-          <wallet-option
-            v-for="(item, idx) in items"
-            :key="item.name + idx"
-            :selected="selected === item.name"
-            :hover-icon="item.imgHoverPath"
-            :text="item.text"
-            :name="item.name"
-            @updateSelected="updateSelected"
-          />
-        </div>
-        <div class="hardware-link">
-          <p>
-            {{ $t('accessWallet.buyHardwareWallet') }}
-          </p>
-        </div>
-        <input
-          ref="jsonInput"
-          type="file"
-          name="file"
-          style="display: none"
-          @change="uploadFile"
-        />
+<b-modal ref="software" :title="$t('accessWallet.software.modal.title')" hide-footer class="bootstrap-modal nopadding modal-software" centered static lazy>
+  <div class="warning">
+    <warning-message />
+  </div>
+  <div class="content-block">
+    <div class="d-block content-container text-center">
+      <div class="button-options">
+        <wallet-option v-for="(item, idx) in items" :key="item.name + idx" :selected="selected === item.name" :hover-icon="item.imgHoverPath" :text="$t(item.text)" :name="item.name" @updateSelected="updateSelected" />
       </div>
-      <div class="button-container-block">
-        <standard-button
-          :button-disabled="selected !== '' ? false : true"
-          :options="continueButtonOptions"
-          @click.native="continueAccess"
-        />
+      <div class="hardware-link">
+        <p>
+          {{ $t('accessWallet.software.modal.purchase-text') }}
+        </p>
+        <router-link to="/hardware-wallet-affiliates">{{
+            $t('accessWallet.software.modal.purchase-link')
+          }}</router-link>
       </div>
+      <input ref="jsonInput" type="file" name="file" style="display: none" @change="uploadFile" />
     </div>
-  </b-modal>
+    <div class="button-container-block">
+      <standard-button :button-disabled="selected !== '' ? false : true" :options="{
+            title: $t('common.continue'),
+            buttonStyle: 'green',
+            noMinWidth: true,
+            fullWidth: true
+          }" :click-function="continueAccess" />
+    </div>
+  </div>
+</b-modal>
 </template>
 
 <script>
@@ -56,7 +38,9 @@ import byMnemImgHov from '@/assets/images/icons/button-mnemonic-hover.svg';
 import privKeyImgHov from '@/assets/images/icons/button-key-hover.svg';
 import WalletOption from '../WalletOption';
 import StandardButton from '@/components/Buttons/StandardButton';
-import { Toast } from '@/helpers';
+import {
+  Toast
+} from '@/helpers';
 
 export default {
   components: {
@@ -85,29 +69,22 @@ export default {
   },
   data() {
     return {
-      continueButtonOptions: {
-        title: this.$t('common.continue'),
-        buttonStyle: 'green',
-        noMinWidth: true,
-        fullWidth: true
-      },
       file: '',
       selected: '',
-      items: [
-        {
+      items: [{
           name: 'byJson',
           imgHoverPath: byJsonImgHov,
-          text: this.$t('common.jsonF')
+          text: 'accessWallet.json-file'
         },
         {
           name: 'byMnem',
           imgHoverPath: byMnemImgHov,
-          text: this.$t('common.mnemonicP')
+          text: 'accessWallet.mnemonic.string'
         },
         {
           name: 'byPriv',
           imgHoverPath: privKeyImgHov,
-          text: this.$t('common.privKey')
+          text: 'accessWallet.private-key.string'
         }
       ]
     };

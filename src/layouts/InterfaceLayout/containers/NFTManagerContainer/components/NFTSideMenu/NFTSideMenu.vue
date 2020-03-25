@@ -1,33 +1,53 @@
 <template>
   <div class="nft-side-menu">
     <div class="desktop-menu">
-      <ul class="listing-container">
-        <li
-          v-for="i in sortByCount"
-          :key="i.key"
-          :class="i.contract === selected ? 'selected' : ''"
-          @click="selectNft(i)"
+      <div class="d-flex align-items-center">
+        <div>
+          <h2 class="mr-4 mb-0">{{ $t('nftManager.avail-nft') }}</h2>
+        </div>
+        <b-button
+          size="sm"
+          variant="outline-primary"
+          @click="openCustomModal"
+          >{{ $t('nftManager.custom') }}</b-button
         >
-          <span class="title">{{ i.title }}</span>
+      </div>
+      <p class="mb-4">
+        {{ $t('nftManager.select-item') }}
+      </p>
 
-          <span class="count">({{ i.count }})</span>
-          <i
-            v-show="i.customNft"
-            class="fa fa-times-circle clickable remove"
-            @click="removeCustomEntry(i)"
-          />
-        </li>
-        <li>
-          <span class="add-custom" @click="openCustomModal"
-            >+{{ $t('dapps.customNFT') }}</span
+      <b-row>
+        <b-col
+          v-for="v in sortByCount"
+          :key="v.key"
+          cols="4"
+          md="4"
+          lg="3"
+          class="mb-4"
+        >
+          <NftProductCard
+            :data="v"
+            :selected="v.contract === selected ? true : false"
+            :nft-card-url="nftCardUrl"
+            @click.native="selectNft(v)"
           >
-        </li>
-      </ul>
+            <i
+              v-show="v.customNft"
+              class="fa fa-times-circle clickable remove"
+              @click="removeCustomEntry(v)"
+            />
+          </NftProductCard>
+        </b-col>
+      </b-row>
     </div>
     <div class="mobile-menu">
-      <b-dropdown text="CryptoKitties (5)">
-        <b-dropdown-item v-for="i in sortByCount" :key="i.key" href="#">
-          {{ i.title }} ({{ i.count }})
+      <b-dropdown :text="currentProduct">
+        <b-dropdown-item
+          v-for="v in sortByCount"
+          :key="v.key"
+          @click.native="selectNft(v)"
+        >
+          {{ v.name }} ({{ v.tokens.length }})
         </b-dropdown-item>
       </b-dropdown>
     </div>
@@ -35,12 +55,10 @@
 </template>
 
 <script>
-import InputSearch from '@/components/Inputs/InputSearch';
+import NftProductCard from '../NftProductCard';
 
 export default {
-  components: {
-    'input-search': InputSearch
-  },
+  components: { NftProductCard },
   props: {
     supportedNftObj: {
       type: Object,
@@ -59,21 +77,26 @@ export default {
     sentUpdate: {
       type: Number,
       default: 0
+    },
+    nftCardUrl: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
       selected: '',
-      searchResults: []
+      searchResults: [],
+      currentProduct: ''
     };
   },
   computed: {
     sortByCount() {
       return Object.values(this.supportedNftObj).sort((a, b) => {
-        if (a.count < b.count) {
+        if (a.tokens.length < b.tokens.length) {
           return 1;
         }
-        if (a.count > b.count) {
+        if (a.tokens.length > b.tokens.length) {
           return -1;
         }
         return 0;
@@ -100,8 +123,9 @@ export default {
       this.$emit('selected', this.selected);
     },
     selectNft(nft) {
+      this.currentProduct = nft.name + ' (' + nft.tokens.length + ')';
       this.searchResults = [];
-      if (nft.count > 0) {
+      if (nft.tokens.length > 0) {
         this.selected = nft.contract;
         this.$emit('selected', nft.contract);
       }

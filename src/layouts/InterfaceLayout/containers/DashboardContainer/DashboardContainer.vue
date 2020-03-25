@@ -2,18 +2,15 @@
   <div class="dashboard-container">
     <div class="container--flex container--top">
       <div class="container--card block--actions">
-        <div class="flex--row--align-center title">
-          <h4>{{ $t('common.actions') }}</h4>
+        <div class="title">
+          <h4>{{ $t('interface.actions') }}</h4>
         </div>
         <div class="buttons">
-          <button-send-tx
-            class="clickable"
-            @click.native="goTo('send-transaction')"
-          />
+          <button-send-tx :go-to="goTo" class="clickable" />
           <button-nft-manager
             :disabled="!isOnlineAndEth"
+            :go-to="goTo"
             class="clickable"
-            @click.native="goTo('nft-manager', !isOnlineAndEth)"
           />
         </div>
       </div>
@@ -29,7 +26,7 @@
           </button>
         </div>
         <p class="section-description">
-          {{ $t('interface.dashboardSwap') }}
+          {{ $t('interface.dashboard-swap') }}
         </p>
         <div class="swap-info">
           <div v-for="pair in swapPairs" :key="pair.from + pair.to">
@@ -42,11 +39,19 @@
                 {{ pair.amt }} {{ pair.from }} / {{ pair.rate }} {{ pair.to }}
               </p>
               <div class="margin--left--auto flex--row--align-center">
+                <span v-if="!getIcon(pair.from)" class="currency-symbol">
+                  <img :src="iconFetcher(pair.from)" class="icon-image" />
+                </span>
                 <span
+                  v-if="getIcon(pair.from)"
                   :class="['currency-symbol', 'cc', pair.from, 'cc-icon']"
                 ></span>
-                <img src="@/assets/images/icons/swap.svg" alt />
+                <img src="@/assets/images/icons/swap-widget.svg" alt />
+                <span v-if="!getIcon(pair.to)" class="currency-symbol">
+                  <img :src="iconFetcher(pair.to)" class="icon-image" />
+                </span>
                 <span
+                  v-if="getIcon(pair.to)"
                   :class="['currency-symbol', 'cc', pair.to, 'cc-icon']"
                 ></span>
               </div>
@@ -64,7 +69,7 @@
             class="title-button prevent-user-select"
             @click="goTo('dapps')"
           >
-            {{ $t('common.viewAll') }}
+            {{ $t('interface.view-all') }}
           </button>
         </div>
         <div class="block--container">
@@ -76,6 +81,7 @@
             :icon-disabled="dapp.iconDisabled"
             :desc="$t(dapp.desc)"
             :param="dapp.route"
+            :release-date="dapp.releaseDate"
             :supported-networks="dapp.supportedNetworks"
             class="dapp"
           />
@@ -87,16 +93,12 @@
 
 <script>
 import { mapState } from 'vuex';
-import InterfaceContainerTitle from '../../components/InterfaceContainerTitle';
-import CurrencyPicker from '../../components/CurrencyPicker';
-import InterfaceBottomText from '@/components/InterfaceBottomText';
-import Blockie from '@/components/Blockie';
 import tabsConfig from '../../components/InterfaceSideMenu/InterfaceSideMenu.config';
 import DappButtons from '../../components/DappButtons';
 import dapps from '@/dapps';
-import SwapWidget from '@/components/SwapWidget';
 import ButtonNftManager from './components/ButtonNftManager';
 import ButtonSendTx from './components/ButtonSendTx';
+import { hasIcon } from '@/partners';
 
 import { SwapProviders, providers } from '@/partners';
 import BigNumber from 'bignumber.js';
@@ -107,12 +109,7 @@ const toBigNumber = num => {
 
 export default {
   components: {
-    'interface-container-title': InterfaceContainerTitle,
-    'interface-bottom-text': InterfaceBottomText,
-    blockie: Blockie,
-    'currency-picker': CurrencyPicker,
     'dapp-buttons': DappButtons,
-    'swap-widget': SwapWidget,
     'button-nft-manager': ButtonNftManager,
     'button-send-tx': ButtonSendTx
   },
@@ -156,13 +153,13 @@ export default {
       swap: new SwapProviders(
         providers,
         {
-          network: this.$store.state.network.type.name,
-          web3: this.$store.state.web3,
+          network: this.$store.state.main.network.type.name,
+          web3: this.$store.state.main.web3,
           getRateForUnit: false
         },
         {
           tokensWithBalance: this.tokensWithBalance,
-          online: this.$store.state.online
+          online: this.$store.state.main.online
         }
       ),
       updatingRates: false,
@@ -179,23 +176,20 @@ export default {
   },
 
   computed: {
-    ...mapState(['account', 'web3', 'network', 'online']),
+    ...mapState('main', ['account', 'web3', 'network', 'online']),
     sortedObject() {
       const arrayedDapp = [];
+      const actualReturnedDapp = [];
       Object.keys(dapps).forEach(dapp => {
-        if (this.dappsToShow.includes(dapp)) {
-          arrayedDapp.push(dapps[dapp]);
-        }
+        if (dapp === 'manageEns' || dapp === 'maker')
+          actualReturnedDapp.push(dapps[dapp]);
+        arrayedDapp.push(dapps[dapp]);
       });
-
-      return arrayedDapp.sort((a, b) => {
-        if (
-          a.supportedNetworks.includes(this.network.type.name) ||
-          b.supportedNetworks.includes(this.network.type.name)
-        )
-          return 1;
-        return 0;
-      });
+      const newestDapp = arrayedDapp.sort((a, b) => {
+        return new Date(b.releaseDate) - new Date(a.releaseDate);
+      })[0];
+      actualReturnedDapp.push(newestDapp);
+      return actualReturnedDapp;
     },
     isOnlineAndEth() {
       return this.online && this.network.type.name === 'ETH';
@@ -219,7 +213,7 @@ export default {
           },
           {
             tokensWithBalance: this.tokensWithBalance,
-            online: this.$store.state.online
+            online: this.$store.state.main.online
           }
         );
       }, 500);
@@ -233,6 +227,20 @@ export default {
     }
   },
   methods: {
+    iconFetcher(currency) {
+      let icon;
+      try {
+        // eslint-disable-next-line
+        icon = require(`@/assets/images/currency/coins/AllImages/${currency}.svg`);
+      } catch (e) {
+        // eslint-disable-next-line
+        return require(`@/assets/images/icons/web-solution.svg`);
+      }
+      return icon;
+    },
+    getIcon(currency) {
+      return hasIcon(currency);
+    },
     goTo(page, disabled) {
       if (disabled) return;
       let childIndex = -1;

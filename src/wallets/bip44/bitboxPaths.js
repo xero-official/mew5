@@ -21,7 +21,8 @@ import {
   mixBlockchain,
   iolite,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  ethercore
 } from './paths';
 export default [
   ethereum,
@@ -46,5 +47,6 @@ export default [
   mixBlockchain,
   iolite,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  ethercore
 ];

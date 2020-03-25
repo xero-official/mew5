@@ -12,8 +12,6 @@ const DNSProcessErrorContainer = () =>
   import('./containers/DNSProcessErrorContainer');
 const DNSMissingTXTContainer = () =>
   import('./containers/DNSMissingTXTContainer');
-const TransferRegistrarsContainer = () =>
-  import('./containers/TransferRegistrarsContainer');
 const CreateCommitmentContainer = () =>
   import('./containers/CreateCommitmentContainer');
 const PermanentRegistrationContainer = () =>
@@ -25,7 +23,6 @@ export default {
   path: 'dapps/manage-ens',
   component: ManageENS,
   props: true,
-  meta: { requiresAuth: true },
   children: [
     {
       path: '',
@@ -73,12 +70,6 @@ export default {
       path: 'no-txt-setup',
       name: 'No TXT setup for DNS',
       component: DNSMissingTXTContainer,
-      props: true
-    },
-    {
-      path: 'transfer-registrar',
-      name: 'Transfer ENS Registrar',
-      component: TransferRegistrarsContainer,
       props: true
     },
     {

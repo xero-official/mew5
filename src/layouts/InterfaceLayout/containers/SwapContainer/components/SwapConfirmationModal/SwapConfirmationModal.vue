@@ -2,16 +2,16 @@
   <div class="modal-container">
     <b-modal
       ref="swapconfirmation"
+      :title="$t('common.confirmation')"
       hide-footer
       centered
       class="bootstrap-modal bootstrap-modal-wide padding-40-20"
-      title="Confirmation"
       static
       lazy
     >
       <div class="time-remaining">
         <h1>{{ timeRemaining }}</h1>
-        <p>{{ $t('interface.timeRemaining') }}</p>
+        <p>{{ $t('swap.time-remain') }}</p>
       </div>
       <div class="swap-detail">
         <div class="from-address">
@@ -22,7 +22,7 @@
             {{ fromAddress.value }}
             <span>{{ fromAddress.name }}</span>
           </p>
-          <p class="block-title">{{ $t('interface.fromAddr') }}</p>
+          <p class="block-title">{{ $t('sendTx.from-addr') }}</p>
           <p class="address">{{ fromAddress.address }}</p>
         </div>
         <div class="right-arrow">
@@ -36,7 +36,7 @@
             {{ toAddress.value }}
             <span>{{ toAddress.name }}</span>
           </p>
-          <p class="block-title">{{ $t('interface.sendTxToAddr') }}</p>
+          <p class="block-title">{{ $t('sendTx.to-addr') }}</p>
           <p class="address">{{ toAddress.address }}</p>
         </div>
         <div v-else class="to-address">
@@ -73,7 +73,7 @@ import '@/assets/images/currency/coins/asFont/cryptocoins-colors.css';
 
 import BigNumber from 'bignumber.js';
 import * as unit from 'ethjs-unit';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 
 import Arrow from '@/assets/images/etc/single-arrow.svg';
 import iconBtc from '@/assets/images/currency/btc.svg';
@@ -122,7 +122,14 @@ export default {
     };
   },
   computed: {
-    ...mapState(['ens', 'gasPrice', 'web3', 'account', 'wallet', 'network']),
+    ...mapState('main', [
+      'ens',
+      'gasPrice',
+      'web3',
+      'account',
+      'wallet',
+      'network'
+    ]),
     toFiat() {
       return this.fiatCurrenciesArray.includes(this.toAddress.name);
     },
@@ -152,6 +159,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('main', ['addSwapNotification']),
     timeUpdater(swapDetails) {
       clearInterval(this.timerInterval);
       this.timeRemaining = utils.getTimeRemainingString(
@@ -196,7 +204,7 @@ export default {
 
                 _result[tradeIndex]
                   .once('transactionHash', hash => {
-                    this.$store.dispatch('addSwapNotification', [
+                    this.addSwapNotification([
                       noticeTypes.SWAP_HASH,
                       this.currentAddress,
                       this.swapDetails,
@@ -205,7 +213,7 @@ export default {
                     ]);
                   })
                   .once('receipt', res => {
-                    this.$store.dispatch('addSwapNotification', [
+                    this.addSwapNotification([
                       noticeTypes.SWAP_RECEIPT,
                       this.currentAddress,
                       this.swapDetails,
@@ -214,7 +222,7 @@ export default {
                     ]);
                   })
                   .on('error', err => {
-                    this.$store.dispatch('addSwapNotification', [
+                    this.addSwapNotification([
                       noticeTypes.SWAP_ERROR,
                       this.currentAddress,
                       this.swapDetails,
@@ -230,7 +238,7 @@ export default {
             this.web3.eth
               .sendTransaction(this.preparedSwap[0])
               .once('transactionHash', hash => {
-                this.$store.dispatch('addSwapNotification', [
+                this.addSwapNotification([
                   noticeTypes.SWAP_HASH,
                   this.currentAddress,
                   this.swapDetails,
@@ -239,7 +247,7 @@ export default {
                 ]);
               })
               .once('receipt', res => {
-                this.$store.dispatch('addSwapNotification', [
+                this.addSwapNotification([
                   noticeTypes.SWAP_RECEIPT,
                   this.currentAddress,
                   this.swapDetails,
@@ -248,7 +256,7 @@ export default {
                 ]);
               })
               .on('error', err => {
-                this.$store.dispatch('addSwapNotification', [
+                this.addSwapNotification([
                   noticeTypes.SWAP_ERROR,
                   this.currentAddress,
                   this.swapDetails,
@@ -264,7 +272,7 @@ export default {
           this.web3.eth
             .sendTransaction(this.preparedSwap)
             .once('transactionHash', hash => {
-              this.$store.dispatch('addSwapNotification', [
+              this.addSwapNotification([
                 noticeTypes.SWAP_HASH,
                 this.currentAddress,
                 this.swapDetails,
@@ -273,7 +281,7 @@ export default {
               ]);
             })
             .once('receipt', res => {
-              this.$store.dispatch('addSwapNotification', [
+              this.addSwapNotification([
                 noticeTypes.SWAP_RECEIPT,
                 this.currentAddress,
                 this.swapDetails,
@@ -282,7 +290,7 @@ export default {
               ]);
             })
             .on('error', err => {
-              this.$store.dispatch('addSwapNotification', [
+              this.addSwapNotification([
                 noticeTypes.SWAP_ERROR,
                 this.currentAddress,
                 this.swapDetails,

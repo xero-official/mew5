@@ -1,7 +1,7 @@
 <template>
   <b-modal
     ref="password"
-    :title="$t('accessWallet.password')"
+    :title="$t('common.password.string')"
     hide-footer
     class="bootstrap-modal modal-software nopadding"
     centered
@@ -17,11 +17,11 @@
         <div class="input-container">
           <input
             ref="passwordInput"
-            :type="show ? 'text' : 'password'"
             v-model="password"
+            :type="show ? 'text' : 'password'"
+            :placeholder="$t('common.password.enter')"
             name="Password"
             autocomplete="off"
-            placeholder="Enter password"
           />
           <img
             v-if="show"
@@ -42,7 +42,7 @@
           type="submit"
           @click.prevent="unlockWallet"
         >
-          <span v-show="!spinner">{{ $t('common.accessWallet') }}</span>
+          <span v-show="!spinner">{{ $t('common.wallet.access') }}</span>
           <i v-show="spinner" class="fa fa-spin fa-spinner fa-lg" />
         </button>
       </form>
@@ -54,7 +54,7 @@
 import { WalletInterface } from '@/wallets';
 import { KEYSTORE as keyStoreType } from '@/wallets/bip44/walletTypes';
 import walletWorker from 'worker-loader!@/workers/wallet.worker.js';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { Toast, Wallet } from '@/helpers';
 import WarningMessage from '@/components/WarningMessage';
 
@@ -78,7 +78,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['path', 'online']),
+    ...mapState('main', ['path', 'online']),
     inputValid() {
       return (
         this.walletRequirePass(this.file) &&
@@ -92,6 +92,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('main', ['decryptWallet']),
     walletRequirePass(ethjson) {
       if (ethjson.encseed != null) return true;
       else if (ethjson.Crypto != null || ethjson.crypto != null) return true;
@@ -112,11 +113,17 @@ export default {
           data: [this.file, this.password]
         });
         worker.onmessage = function(e) {
+          const obj = {
+            file: this.file,
+            name: e.data.filename
+          };
           self.setUnlockedWallet(
             new WalletInterface(
               Buffer.from(e.data._privKey),
               false,
-              keyStoreType
+              keyStoreType,
+              '',
+              JSON.stringify(obj)
             )
           );
         };
@@ -141,7 +148,7 @@ export default {
       }
     },
     setUnlockedWallet(wallet) {
-      this.$store.dispatch('decryptWallet', [wallet]).then(() => {
+      this.decryptWallet([wallet]).then(() => {
         this.spinner = false;
         this.password = '';
         this.$router.push({

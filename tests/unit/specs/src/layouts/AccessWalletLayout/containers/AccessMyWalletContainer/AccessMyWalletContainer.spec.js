@@ -5,13 +5,15 @@ import AccessMyWalletContainer from '@/layouts/AccessWalletLayout/containers/Acc
 import HardwarePasswordModal from '@/layouts/AccessWalletLayout/components/HardwarePasswordModal/HardwarePasswordModal.vue';
 import AccessWalletButton from '@/layouts/AccessWalletLayout/components/AccessWalletButton/AccessWalletButton.vue';
 import HardwareModal from '@/layouts/AccessWalletLayout/components/HardwareModal/HardwareModal.vue';
-import MetamaskModal from '@/layouts/AccessWalletLayout/components/MetamaskModal/MetamaskModal.vue';
+import Web3WalletModal from '@/layouts/AccessWalletLayout/components/Web3WalletModal/Web3WalletModal.vue';
 import MewConnectModal from '@/layouts/AccessWalletLayout/components/MewConnectModal/MewConnectModal.vue';
 import SoftwareModal from '@/layouts/AccessWalletLayout/components/SoftwareModal/SoftwareModal.vue';
 import MnemonicModal from '@/layouts/AccessWalletLayout/components/MnemonicModal';
 import PasswordModal from '@/layouts/AccessWalletLayout/components/PasswordModal/PasswordModal.vue';
 import PrivateKeyModal from '@/layouts/AccessWalletLayout/components/PrivateKeyModal/PrivateKeyModal.vue';
 import { Tooling } from '@@/helpers';
+import VueX from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
 const BBtnStub = {
   name: 'b-btn',
@@ -26,7 +28,15 @@ describe('AccessMyWalletContainer.vue', () => {
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new VueX.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
 
     Vue.config.warnHandler = () => {};
   });
@@ -57,7 +67,7 @@ describe('AccessMyWalletContainer.vue', () => {
         'hardware-password-modal': HardwarePasswordModal,
         'access-wallet-button': AccessWalletButton,
         'hardware-modal': HardwareModal,
-        'metamask-modal': MetamaskModal,
+        'metamask-modal': Web3WalletModal,
         'mew-connect-modal': MewConnectModal,
         'software-modal': SoftwareModal,
         'mnemonic-modal': MnemonicModal,

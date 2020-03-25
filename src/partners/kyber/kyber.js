@@ -29,6 +29,8 @@ const toBigNumber = num => {
   return new BigNumber(num);
 };
 
+const DAI = 'DAI';
+
 export default class Kyber {
   constructor(props = {}) {
     this.name = Kyber.getName();
@@ -121,9 +123,10 @@ export default class Kyber {
       .call();
   }
 
-  setNetwork(network) {
+  setNetwork(network, web3) {
     this.network = network;
     if (this.isValidNetwork) {
+      this.web3 = web3;
       this.getMainNetAddress(kyberAddressFallback[this.network]);
       this.getSupportedTokenList();
     }
@@ -183,6 +186,7 @@ export default class Kyber {
           ) {
             // otherwise the entry is invalid
             const symbol = tokenList[i].symbol.toUpperCase();
+            tokenList[i].contractAddress = tokenList[i].address;
             tokenDetails[symbol] = tokenList[i];
           }
         }
@@ -193,6 +197,7 @@ export default class Kyber {
     } catch (e) {
       utils.handleOrThrow(e);
       errorLogger(e);
+      return KyberCurrencies[this.network];
     }
   }
 
@@ -229,17 +234,59 @@ export default class Kyber {
       .toNumber();
   }
 
+  async ethEquivalentQty(fromCurrency) {
+    return await this.getExpactedRateInTokens('ETH', fromCurrency, 0.5);
+  }
+
+  async rateDivergence(rate, fromCurrency, toCurrency, fromValue) {
+    if (toBigNumber(rate).lte(0)) return toBigNumber(-1);
+    const val = await this.ethEquivalentQty(
+      fromCurrency,
+      toCurrency,
+      fromValue
+    );
+
+    const equivalentRate = await this.getExpactedRateInTokens(
+      fromCurrency,
+      toCurrency,
+      val || 0.5,
+      true
+    );
+
+    const difference = toBigNumber(rate).div(equivalentRate);
+    const value = toBigNumber(1).minus(difference);
+    if (value.gt(0)) {
+      return value;
+    }
+    return toBigNumber(0);
+  }
+
   async getRate(fromCurrency, toCurrency, fromValue) {
     const rate = await this.getExpactedRateInTokens(
       fromCurrency,
       toCurrency,
       this.getRateForUnit ? 1 : fromValue
     );
+
+    const diff = await this.rateDivergence(
+      rate,
+      fromCurrency,
+      toCurrency,
+      fromValue
+    );
+    const additional = {};
+    if (diff.gt(0.001)) {
+      additional['display'] = {
+        txtKey: 'kyber-slippage',
+        value: diff.times(100).toFixed(2, BigNumber.ROUND_HALF_UP)
+      };
+    }
     return {
       fromCurrency,
       toCurrency,
       provider: this.name,
-      rate: this.calculateTrueRate(rate)
+      rate: this.calculateTrueRate(rate),
+      additional: additional
     };
   }
 
@@ -255,6 +302,9 @@ export default class Kyber {
       fromValueWei
     );
     logger(rates);
+    if (!rates) {
+      return -1;
+    }
     if (new BigNumber(rates['expectedRate']).eq(new BigNumber(0))) {
       return -1;
     }
@@ -268,7 +318,7 @@ export default class Kyber {
     if (new BigNumber(inWei).gt(-1)) {
       return this.convertToTokenBase(kyberBaseCurrency, inWei);
     }
-    return -1;
+    return 0;
   }
 
   getInitialCurrencyEntries(collectMapFrom, collectMapTo) {
@@ -313,8 +363,12 @@ export default class Kyber {
         .methods[method](...parameters)
         .call();
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      if (method === 'getExpectedRate') {
+        // eslint-disable-next-line
+        console.error(e);
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -462,7 +516,7 @@ export default class Kyber {
       value: Object.values(networkSymbols).includes(fromCurrency)
         ? fromValueWei
         : 0,
-      gas: this.getTokenTradeGas(fromCurrency, toCurrency),
+      gas: this.getTokenTradeGas(fromCurrency, toCurrency, fromValueWei),
       data
     };
   }
@@ -561,7 +615,13 @@ export default class Kyber {
     );
   }
 
-  getTokenTradeGas(fromCurrency, toCurrency) {
+  getTokenTradeGas(fromCurrency, toCurrency, fromValueWei) {
+    const shouldIncreaseGas = // check if value is likely in wei (should be, but checking anyway)
+      toBigNumber(fromValueWei).gt(this.convertToTokenWei('ETH', 499)) ||
+      toBigNumber(fromValueWei).gt(100000000);
+    if (toCurrency === DAI && shouldIncreaseGas) {
+      return toBigNumber(1500000);
+    }
     const fromGas = this.getTokenSwapGas(fromCurrency);
     const toGas = this.getTokenSwapGas(toCurrency);
     return toBigNumber(fromGas)
@@ -583,9 +643,11 @@ export default class Kyber {
   getTokenAddress(token) {
     try {
       if (utils.stringEqual(networkSymbols.ETH, token)) {
-        return this.currencies[token].address;
+        return this.currencies[token].contractAddress;
       }
-      return this.web3.utils.toChecksumAddress(this.currencies[token].address);
+      return this.web3.utils.toChecksumAddress(
+        this.currencies[token].contractAddress
+      );
     } catch (e) {
       errorLogger(e);
       throw Error(

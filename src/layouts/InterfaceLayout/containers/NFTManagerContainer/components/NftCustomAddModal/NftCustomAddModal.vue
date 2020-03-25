@@ -2,7 +2,7 @@
   <div>
     <b-modal
       ref="modal"
-      :title="$t('dapps.addCustomNFT')"
+      :title="$t('nftManager.add-custom')"
       hide-footer
       class="bootstrap-modal nopadding max-height-1"
       centered
@@ -11,32 +11,30 @@
       <form class="tokens-modal-body" @keydown.enter.prevent>
         <div>
           <input
-            v-validate="'required'"
             v-model="contractAddress"
+            v-validate="'required'"
             :class="[
               'custom-input-text-1',
               contractAddress !== '' && !validAddress ? 'invalid-address' : ''
             ]"
+            :placeholder="$t('nftManager.ph-token-addr')"
             name="Address"
             type="text"
-            placeholder="Token Contract Address"
           />
           <span
             v-show="contractAddress !== '' && !validAddress"
             class="error-message"
           >
-            Invalid address given.
+            {{ $t('nftManager.invalid-addr') }}
           </span>
           <span v-show="nonStandardMessage">
-            NFT token contract doesn't include a required method to add as a
-            custom NFT or you do not have
+            {{ $t('nftManager.no-method-no-token', { token: tokenSymbol }) }}
           </span>
           <input
-            v-validate="'required'"
             v-model="tokenSymbol"
-            name="Symbol"
+            :placeholder="$t('nftManager.name')"
+            name="Name"
             type="text"
-            placeholder="NFT name"
             class="custom-input-text-1"
           />
         </div>
@@ -48,11 +46,11 @@
             ]"
             @click.prevent="addCustom(contractAddress, tokenSymbol)"
           >
-            {{ $t('interface.save') }}
+            {{ $t('common.save') }}
           </button>
           <interface-bottom-text
-            :link-text="$t('interface.helpCenter')"
-            :question="$t('interface.dontKnow')"
+            :link-text="$t('common.help-center')"
+            :question="$t('common.dont-know')"
             link="https://kb.myetherwallet.com"
           />
         </div>
@@ -90,7 +88,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['web3']),
+    ...mapState('main', ['web3']),
     allFieldsValid() {
       if (!this.validAddress) return false;
       if (this.tokenSymbol === '') return false;
@@ -120,63 +118,10 @@ export default {
       this.nonStandardMessage = false;
     },
     async addCustom(address, symbol) {
-      const result = await this.checkIfStandard(address);
-      if (result) this.addToken(address, symbol);
-      else {
-        this.nonStandardMessage = true;
-      }
+      this.addToken(address, symbol);
     },
     openCustomModal() {
       this.$refs.customModal.$refs.modal.show();
-    },
-    checkIfStandard(address) {
-      return new Promise(resolve => {
-        // 0x780e9d63
-        const tokenContract = new this.web3.eth.Contract([
-          {
-            constant: true,
-            inputs: [
-              { name: '_owner', type: 'address' },
-              { name: '_index', type: 'uint256' }
-            ],
-            name: 'tokenOfOwnerByIndex',
-            outputs: [{ name: '', type: 'uint256' }],
-            payable: false,
-            stateMutability: 'view',
-            type: 'function'
-          },
-          {
-            constant: true,
-            inputs: [{ name: '_interfaceId', type: 'bytes4' }],
-            name: 'supportsInterface',
-            outputs: [{ name: '', type: 'bool' }],
-            payable: false,
-            stateMutability: 'view',
-            type: 'function'
-          }
-        ]);
-        tokenContract.options.address = address;
-        tokenContract.methods
-          .supportsInterface('0x780e9d63')
-          .call()
-          .then(res => {
-            if (res) resolve(true);
-            else {
-              tokenContract.methods
-                .tokenOfOwnerByIndex(this.activeAddress, 0)
-                .call()
-                .then(() => {
-                  resolve(true);
-                })
-                .catch(() => {
-                  resolve(false);
-                });
-            }
-          })
-          .catch(() => {
-            resolve(false);
-          });
-      });
     }
   }
 };

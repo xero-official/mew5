@@ -2,7 +2,7 @@
   <div>
     <b-modal
       ref="ledgerApp"
-      title="Choose the App"
+      :title="$t('accessWallet.ledger.modal.title')"
       hide-footer
       class="bootstrap-modal"
       centered
@@ -11,7 +11,7 @@
       @hidden="reset"
     >
       <div class="ledger-app-selection-container">
-        <h4>Please choose the App you have opened in Ledger</h4>
+        <h4>{{ $t('accessWallet.ledger.modal.text') }}</h4>
         <div class="ledger-app-info">
           <div class="selected-app-icon">
             <img :src="selectedApp.network.icon" alt />
@@ -49,7 +49,9 @@
             class="custom-path-inputs"
           >
             <div class="path-input">
-              <label for="custom-label"> Alias </label>
+              <label for="custom-label">
+                {{ $t('accessWallet.path.allias') }}</label
+              >
               <input
                 v-model="customLabel"
                 name="custom-label"
@@ -57,7 +59,9 @@
               />
             </div>
             <div class="path-input">
-              <label for="custom-path"> Path </label>
+              <label for="custom-path">{{
+                $t('accessWallet.path.string')
+              }}</label>
               <input
                 v-model="customPath"
                 name="custom-path"
@@ -66,10 +70,10 @@
             </div>
             <div class="custom-path-actions">
               <div class="cancel" @click="cancel">
-                Cancel
+                {{ $t('common.cancel') }}
               </div>
-              <div class="proceed" @click="addCustomPath">
-                Add Custom Path
+              <div class="proceed" @click="locAddCustomPath">
+                {{ $t('accessWallet.path.add-custom') }}
               </div>
             </div>
           </div>
@@ -108,7 +112,7 @@
             ]"
             @click="next"
           >
-            Next
+            {{ $t('common.next') }}
           </button>
         </div>
       </div>
@@ -162,7 +166,7 @@ export default {
     dropDownDefaultText() {
       return `${this.selectedPath.label} - ${this.selectedPath.path}`;
     },
-    ...mapState(['customPaths'])
+    ...mapState('main', ['customPaths'])
   },
   watch: {
     selectedApp: {
@@ -185,11 +189,12 @@ export default {
     });
   },
   methods: {
+    ...mapActions('main', ['removeCustomPath', 'addCustomPath']),
     remove(path, idx) {
       const mappedPaths = this.selectedApp.paths.filter((item, itemIdx) => {
         if (itemIdx !== idx) return item;
       });
-      this.$store.dispatch('removeCustomPath', path);
+      this.removeCustomPath(path);
       this.setupCustomPaths();
       this.selectedApp.paths = mappedPaths;
       this.selectedPath =
@@ -231,24 +236,25 @@ export default {
 
       this.apps = loc;
     },
-    addCustomPath() {
+    locAddCustomPath() {
       const customPath = pathHelpers.checkCustomPath(this.customPath);
       if (customPath) {
         this.selectedPath = {
           path: customPath,
           label: this.customLabel
         };
-        this.$store
-          .dispatch('addCustomPath', {
-            label: this.customLabel,
-            path: customPath
-          })
-          .then(() => {
-            this.setupCustomPaths();
-            this.selectedApp.paths.unshift(this.selectedPath);
-          });
+        this.addCustomPath({
+          label: this.customLabel,
+          path: customPath
+        }).then(() => {
+          this.setupCustomPaths();
+          this.selectedApp.paths.unshift(this.selectedPath);
+        });
       } else {
-        Toast.responseHandler('Invalid Custom Path', Toast.ERROR);
+        Toast.responseHandler(
+          this.$t('access-wallet.path.ivalid-custom'),
+          Toast.ERROR
+        );
       }
     },
     cancel() {

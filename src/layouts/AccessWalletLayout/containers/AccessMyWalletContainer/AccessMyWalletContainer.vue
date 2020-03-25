@@ -1,90 +1,47 @@
 <template>
-  <div class="access-my-wallet-options">
-    <ledger-app-modal
-      ref="ledgerAppModal"
-      :networks="Networks"
-      @hardwareWalletOpen="hardwareWalletOpen"
-    />
+<div class="access-my-wallet-options">
+  <ledger-app-modal ref="ledgerAppModal" :networks="Networks" @hardwareWalletOpen="hardwareWalletOpen" />
 
-    <hardware-modal
-      ref="hardwareModal"
-      :ledger-app-open="ledgerAppModalOpen"
-      :network-and-address-open="networkAndAddressOpen"
-      :open-finney="finneyModalOpen"
-      @hardwareRequiresPassword="hardwarePasswordModalOpen"
-      @hardwareWalletOpen="hardwareWalletOpen"
-    />
+  <hardware-modal ref="hardwareModal" :ledger-app-open="ledgerAppModalOpen" :network-and-address-open="networkAndAddressOpen" :open-finney="finneyModalOpen" :open-xwallet="xwalletModalOpen" @hardwareRequiresPassword="hardwarePasswordModalOpen"
+    @hardwareWalletOpen="hardwareWalletOpen" />
 
-    <hardware-password-modal
-      ref="hardwarePasswordModal"
-      :wallet-constructor="walletConstructor"
-      :hardware-brand="hardwareBrand"
-      @hardwareWalletOpen="hardwareWalletOpen"
-    />
+  <hardware-password-modal ref="hardwarePasswordModal" :wallet-constructor="walletConstructor" :hardware-brand="hardwareBrand" @hardwareWalletOpen="hardwareWalletOpen" />
 
-    <network-and-address-modal
-      ref="networkandaddressModal"
-      :hardware-wallet="hardwareWallet"
-    />
+  <network-and-address-modal ref="networkandaddressModal" :hardware-wallet="hardwareWallet" />
 
-    <metamask-modal ref="metamaskModal" />
+  <metamask-modal ref="metamaskModal" :is-meta-mask="isMetaMask" :web3-wallet-exists="web3WalletExists" />
 
-    <software-modal
-      ref="softwareModal"
-      :open-password="passwordOpen"
-      :open-private-key-input="privateKeyOpen"
-      :open-mnemonic-phrase-input="mnemonicphraseModalOpen"
-      @file="fileUploaded"
-    />
+  <software-modal ref="softwareModal" :open-password="passwordOpen" :open-private-key-input="privateKeyOpen" :open-mnemonic-phrase-input="mnemonicphraseModalOpen" @file="fileUploaded" />
 
-    <password-modal ref="passwordModal" :file="file" />
+  <password-modal ref="passwordModal" :file="file" />
 
-    <private-key-modal ref="privatekeyModal" />
+  <private-key-modal ref="privatekeyModal" />
 
-    <mnemonic-modal
-      ref="mnemonicPhraseModal"
-      :hardware-wallet-open="hardwareWalletOpen"
-    />
+  <mnemonic-modal ref="mnemonicPhraseModal" :hardware-wallet-open="hardwareWalletOpen" />
 
-    <!--    <mnemonic-password-modal
-      ref="mnemonicPhrasePassword"
-      :hardware-wallet-open="hardwareWalletOpen"
-      :phrase="phrase"
-    />-->
+  <wallet-password-modal />
+  <finney-modal ref="finney" />
+  <xwallet-modal ref="xwallet" />
+  <enter-pin-number-modal />
 
-    <wallet-password-modal />
-    <finney-modal ref="finney" />
-    <enter-pin-number-modal />
-
-    <div class="wrap">
-      <div class="page-container">
-        <div class="title">
-          <h2>{{ $t('common.accessMyWallet') }}</h2>
-          <h5>
-            {{ $t('common.noWallet') }}
-            <router-link :to="'/create-wallet'" class="nounderline">
-              {{ $t('common.createANewWallet') }}
-            </router-link>
-          </h5>
-        </div>
-        <div class="buttons-container">
-          <access-wallet-button
-            v-for="(button, index) in buttons"
-            :key="button.title + index"
-            :func="button.func"
-            :img="button.img"
-            :img-disabled="button.imgDisabled"
-            :title="button.title"
-            :desc="button.desc"
-            :recommend="button.recommend"
-            :tooltip="button.tooltip"
-            :disabled="button.disabled"
-            :classname="button.classname"
-          />
-        </div>
+  <div class="wrap">
+    <div class="page-container">
+      <div class="title">
+        <h2>{{ $t('common.wallet.access-my') }}</h2>
+        <h5>
+          {{ $t('common.wallet.do-not-have') }}
+          <router-link :to="'/create-wallet'" class="nounderline">
+            {{ $t('common.wallet.create-new') }}
+          </router-link>
+        </h5>
+      </div>
+      <div class="buttons-container">
+        <access-wallet-button v-for="(button, index) in buttons" :key="button.title + index" :func="button.func" :img="button.img" :img-disabled="button.imgDisabled" :title="$t(button.title)" :desc="$t(button.desc)" :recommend="$t(button.recommend)"
+          :tooltip="$t(button.tooltip)" :disabled="button.disabled" :classname="button.classname" :has-other-examples="button.showsOtherExamples" />
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -92,30 +49,34 @@ import FinneyModal from '../../components/FinneyModal';
 import AccessWalletButton from '../../components/AccessWalletButton';
 import HardwareModal from '../../components/HardwareModal';
 import HardwarePasswordModal from '../../components/HardwarePasswordModal';
-import MetamaskModal from '../../components/MetamaskModal';
+import Web3WalletModal from '../../components/Web3WalletModal';
 import MewConnectModal from '../../components/MewConnectModal';
 import NetworkAndAddressModal from '../../components/NetworkAndAddressModal';
 import PasswordModal from '../../components/PasswordModal';
 import PrivateKeyModal from '../../components/PrivateKeyModal';
 import SoftwareModal from '../../components/SoftwareModal';
-import MnemonicPasswordModal from '../../components/MnemonicPasswordModal';
 import MnemonicModal from '../../components/MnemonicModal';
 import LedgerAppModal from '../../components/LedgerAppModal';
 import WalletPasswordModal from '@/components/WalletPasswordModal';
 import EnterPinNumberModal from '@/components/EnterPinNumberModal';
+import XwalletModal from '../../components/XwalletModal';
 
 import mewConnectImg from '@/assets/images/icons/button-mewconnect.svg';
 import hardwareImg from '@/assets/images/icons/button-hardware.svg';
-import metamaskImg from '@/assets/images/icons/button-metamask.svg';
+import mewCxImg from '@/assets/images/icons/button-mew-cx.png';
 import softwareImg from '@/assets/images/icons/button-software.svg';
 
 import mewConnectImgDisabled from '@/assets/images/icons/button-mewconnect-disabled.svg';
 import hardwareImgDisabled from '@/assets/images/icons/button-hardware-disabled.svg';
-import metamaskImgDisabled from '@/assets/images/icons/button-metamask-disabled.svg';
+import mewCxImgDisabled from '@/assets/images/icons/button-mew-cx-disabled.png';
 import softwareImgDisabled from '@/assets/images/icons/button-software-disabled.svg';
 
-import { mapState } from 'vuex';
-import { Toast } from '@/helpers';
+import {
+  mapState
+} from 'vuex';
+import {
+  Toast
+} from '@/helpers';
 
 import DetectRTC from 'detectrtc';
 
@@ -125,17 +86,17 @@ export default {
     'network-and-address-modal': NetworkAndAddressModal,
     'hardware-modal': HardwareModal,
     'hardware-password-modal': HardwarePasswordModal,
-    'metamask-modal': MetamaskModal,
+    'metamask-modal': Web3WalletModal,
     'software-modal': SoftwareModal,
     'password-modal': PasswordModal,
     'private-key-modal': PrivateKeyModal,
     'mnemonic-modal': MnemonicModal,
-    'mnemonic-password-modal': MnemonicPasswordModal,
     'access-wallet-button': AccessWalletButton,
     'wallet-password-modal': WalletPasswordModal,
     'enter-pin-number-modal': EnterPinNumberModal,
     'ledger-app-modal': LedgerAppModal,
-    'finney-modal': FinneyModal
+    'finney-modal': FinneyModal,
+    'xwallet-modal': XwalletModal
   },
   data() {
     return {
@@ -145,11 +106,21 @@ export default {
       hardwareAddresses: [],
       walletConstructor: function() {},
       hardwareBrand: '',
-      buttons: [
+      buttons: [{
+          func: this.mewConnectModalOpen,
+          title: 'common.mewconnect.string',
+          desc: 'accessWallet.mewconnect.option-text',
+          recommend: '',
+          tooltip: '',
+          img: mewConnectImg,
+          imgDisabled: mewConnectImgDisabled,
+          disabled: false,
+          classname: 'button-mewconnect'
+        },
         {
           func: this.hardwareModalOpen,
-          title: this.$t('common.hardware'),
-          desc: 'Ledger wallet, FINNEY, Trezor, BitBox, Secalot, KeepKey',
+          title: 'accessWallet.hardware.option-title',
+          desc: 'accessWallet.hardware.examples',
           recommend: '',
           tooltip: '',
           img: hardwareImg,
@@ -158,41 +129,55 @@ export default {
           classname: 'button-hardware'
         },
         {
-          func: this.metamaskModalOpen,
-          title: 'MetaMask',
-          desc: this.$t('accessWallet.metaMaskDesc'),
+          func: this.web3WalletModal,
+          title: 'accessWallet.web3-wallet',
+          desc: 'accessWallet.web3-wallet-desc',
+          showsOtherExamples: true,
           recommend: '',
           tooltip: '',
-          img: metamaskImg,
-          imgDisabled: metamaskImgDisabled,
+          img: mewCxImg,
+          imgDisabled: mewCxImgDisabled,
           disabled: false,
           classname: 'button-metamask'
         },
         {
           func: this.softwareModalOpen,
-          title: this.$t('accessWallet.software'),
-          desc: this.$t('accessWallet.softwareDesc'),
-          recommend: this.$t('accessWallet.notRecommended'),
+          title: 'accessWallet.software.option-title',
+          desc: 'accessWallet.software.option-text',
+          recommend: 'common.not-recommended.string',
           tooltip: '',
           img: softwareImg,
           imgDisabled: softwareImgDisabled,
           disabled: false,
           classname: 'button-software'
         }
-      ]
+      ],
+      isMetaMask: false,
+      web3WalletExists: false
     };
   },
   computed: {
-    ...mapState(['online', 'Networks'])
+    ...mapState('main', ['Networks', 'online'])
   },
   mounted() {
     this.$nextTick(() => {
       this.buttons.forEach(btn => {
         btn.disabled = this.isDisabled(btn.classname);
       });
+
+      this.checkWeb3();
+      this.checkIsMetamask();
     });
   },
   methods: {
+    checkIsMetamask() {
+      this.isMetaMask = window.ethereum && window.ethereum.isMetaMask;
+    },
+    checkWeb3() {
+      this.web3WalletExists =
+        typeof window.ethereum !== 'undefined' ||
+        typeof window.web3 !== 'undefined';
+    },
     isDisabled(className) {
       switch (className) {
         case 'button-mewconnect':
@@ -215,7 +200,9 @@ export default {
     hardwareModalOpen() {
       this.$refs.hardwareModal.$refs.hardware.show();
     },
-    metamaskModalOpen() {
+    web3WalletModal() {
+      this.checkWeb3();
+      this.checkIsMetamask();
       this.$refs.metamaskModal.$refs.metamask.show();
     },
     softwareModalOpen() {
@@ -229,8 +216,8 @@ export default {
       this.$refs.softwareModal.$refs.software.hide();
       this.$refs.privatekeyModal.$refs.privateKey.show();
     },
-    installMetamaskModalOpen() {
-      this.$refs.installMetamaskModal.$refs.installmetamask.show();
+    installWeb3WalletModalOpen() {
+      this.$refs.installWeb3WalletModal.$refs.installmetamask.show();
     },
     mnemonicphraseModalOpen() {
       this.$refs.mnemonicPhraseModal.$refs.mnemonicPhrase.show();
@@ -253,6 +240,9 @@ export default {
     },
     finneyModalOpen() {
       this.$refs.finney.$refs.finneyModal.show();
+    },
+    xwalletModalOpen() {
+      this.$refs.xwallet.$refs.xwalletModal.show();
     },
     hardwareWalletOpen(wallet) {
       // if (this.$refs.mnemonicPhrasePassword.$refs.password.visible) {

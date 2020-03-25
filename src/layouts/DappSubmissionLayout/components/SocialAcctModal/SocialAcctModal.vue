@@ -2,10 +2,10 @@
   <div class="modal-container">
     <b-modal
       ref="socialAcctModal"
+      :title="$t('dappsSubmission.add-social')"
       class="bootstrap-modal social-acct-modal"
       centered
       hide-footer
-      title="Add a social account"
       static
       lazy
     >
@@ -22,8 +22,8 @@
           </b-form-group>
           <b-form-group>
             <b-form-input
-              v-validate="'url:require_protocol'"
               v-model="dappSocialLink"
+              v-validate="'url:require_protocol'"
               name="url"
               placeholder="URL link"
               type="url"
@@ -41,7 +41,7 @@
           ]"
           @click="onSubmit"
         >
-          Submit
+          {{ $t('dappsSubmission.submit') }}
         </button>
       </div>
     </b-modal>
@@ -51,10 +51,9 @@
 <script>
 import github from '@/assets/images/icons/github.png';
 import twitter from '@/assets/images/icons/twitter.jpg';
-import facebook from '@/assets/images/icons/facebook.png';
 import reddit from '@/assets/images/icons/reddit.svg';
 import medium from '@/assets/images/icons/medium.png';
-import linkedIn from '@/assets/images/icons/linkedin.svg';
+
 
 export default {
   name: 'SocialAcctModal',

@@ -1,8 +1,19 @@
 <template>
   <div id="app">
-    <header-container />
+    <logout-warning-modal ref="logoutWarningModal" />
+    <header-container
+      v-show="
+        $route.fullPath !== '/popup' &&
+          !$route.fullPath.includes('/extension-popups')
+      "
+    />
     <router-view />
-    <footer-container />
+    <footer-container
+      v-show="
+        $route.fullPath !== '/popup' &&
+          !$route.fullPath.includes('/extension-popups')
+      "
+    />
     <confirmation-container />
   </div>
 </template>
@@ -11,13 +22,73 @@
 import FooterContainer from '@/containers/FooterContainer';
 import HeaderContainer from '@/containers/HeaderContainer';
 import ConfirmationContainer from '@/containers/ConfirmationContainer';
+import LogoutWarningModal from '@/components/LogoutWarningModal';
+
+import { mapState, mapActions } from 'vuex';
 
 export default {
   name: 'App',
   components: {
-    'header-container': HeaderContainer,
     'footer-container': FooterContainer,
-    'confirmation-container': ConfirmationContainer
+    'header-container': HeaderContainer,
+    'confirmation-container': ConfirmationContainer,
+    'logout-warning-modal': LogoutWarningModal
+  },
+  computed: {
+    ...mapState('main', ['wallet', 'Networks'])
+  },
+  watch: {
+    $route(to, from) {
+      if (
+        !from.meta.hasOwnProperty('requiresAuth') &&
+        to.meta.hasOwnProperty('requiresAuth') &&
+        this.wallet !== null
+      ) {
+        this.$refs.logoutWarningModal.$refs.logoutWarningModal.show();
+      }
+    }
+  },
+  created() {
+    const _self = this;
+    window.chrome.storage.sync.get(null, item => {
+      if (item.hasOwnProperty('defNetwork')) {
+        const networkProps = JSON.parse(item['defNetwork']);
+        let network = {};
+        if (networkProps.hasOwnProperty('url')) {
+          network = _self.Networks[networkProps.key][0];
+          window.chrome.storage.sync.set(
+            {
+              defNetwork: JSON.stringify({
+                key: network.type.name,
+                service: network.service
+              })
+            },
+            () => {}
+          );
+        } else {
+          network = _self.Networks[networkProps.key][0];
+          window.chrome.storage.sync.set({
+            defNetwork: JSON.stringify({
+              key: network.type.name,
+              service: network.service
+            })
+          });
+        }
+        _self.switchNetwork(network).then(() => {
+          _self.setWeb3Instance();
+        });
+      } else {
+        _self.setWeb3Instance();
+      }
+    });
+  },
+  mounted() {
+    this.$refs.logoutWarningModal.$refs.logoutWarningModal.$on('hidden', () => {
+      window.scrollTo(0, 0);
+    });
+  },
+  methods: {
+    ...mapActions('main', ['setWeb3Instance', 'switchNetwork'])
   }
 };
 </script>

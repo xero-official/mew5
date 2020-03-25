@@ -7,6 +7,8 @@ import PopOver from '@/components/PopOver/PopOver.vue';
 import BackButton from '@/layouts/InterfaceLayout/components/BackButton/BackButton.vue';
 // import sinon from 'sinon';
 import { Tooling } from '@@/helpers';
+import VueX from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
 describe('DeployContractContainer.vue', () => {
   let localVue, i18n, wrapper, store;
@@ -25,7 +27,15 @@ describe('DeployContractContainer.vue', () => {
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new VueX.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
     Vue.config.warnHandler = () => {};
   });
   beforeEach(() => {
@@ -96,6 +106,15 @@ describe('DeployContractContainer.vue', () => {
         .querySelector('i.good-button')
         .className.indexOf('not-good')
     ).toBeGreaterThan(-1);
+  });
+
+  it('should clear the form', () => {
+    wrapper.setData({
+      bytecode: '0x0x0x',
+      abi: '0x0x0x',
+      contractName: 'Contract'
+    });
+    wrapper.find('.clear-all-btn').trigger('click');
   });
 
   describe('DeployContractContainer.vue Methods', () => {

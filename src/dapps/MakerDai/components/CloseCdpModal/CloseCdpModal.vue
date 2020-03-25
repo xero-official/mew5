@@ -2,7 +2,7 @@
   <div class="modal-container">
     <b-modal
       ref="modal"
-      :title="$t('dappsMaker.closeTitle')"
+      :title="$t('dappsMCDMaker.close-title')"
       centered
       class="bootstrap-modal nopadding"
       static
@@ -11,54 +11,54 @@
     >
       <div class="contents">
         <div v-if="!enoughMkr" class="message-container">
-          {{ $t('dappsMaker.notEnoughMkrClose') }}
+          {{ $t('dappsMCDMaker.not-enough-mkr-close') }}
         </div>
         <div v-if="!enoughDai" class="message-container">
-          {{ $t('dappsMaker.notEnoughDaiClose') }}
+          {{ $t('dappsMCDMaker.not-enough-dai-close') }}
         </div>
         <p class="top-text">
-          {{ $t('dappsMaker.closingNotice') }}
+          {{ $t('dappsMCDMaker.closing-notice') }}
         </p>
 
         <div class="value-table-container">
           <div class="value-table mkr-balance">
             <div class="value-block">
               <p>
-                <b>{{ $t('dappsMaker.mkrBalance') }}</b>
+                <b>{{ $t('dappsMCDMaker.mkr-balance') }}</b>
               </p>
               <p>
-                <b>{{ mkrBalance }} MKR</b>
+                <b>{{ mkrBalance }} {{ $t('dappsMCDMaker.mkr') }}</b>
               </p>
             </div>
             <p v-show="!enoughMkr" class="get-mkr" @click="getMkr()">
-              {{ $t('dappsMaker.getMkr') }}
+              {{ $t('dappsMCDMaker.get-mkr') }}
             </p>
           </div>
 
           <div class="value-table mkr-balance">
             <div class="value-block">
               <p>
-                <b>{{ $t('dappsMaker.daiBalance') }}</b>
+                <b>{{ $t('dappsMCDMaker.dai-balance') }}</b>
               </p>
               <p>
-                <b>{{ daiBalance }} DAI</b>
+                <b>{{ daiBalance }} {{ $t('dappsMCDMaker.dai') }}</b>
               </p>
             </div>
             <p v-show="!enoughDai" class="get-mkr" @click="getDai()">
-              {{ $t('dappsMaker.getDai') }}
+              {{ $t('dappsMCDMaker.get-dai') }}
             </p>
           </div>
           <div class="value-table other-values">
             <div class="value-block">
-              <p>{{ $t('dappsMaker.outstandingDai') }}</p>
+              <p>{{ $t('dappsMCDMaker.outstanding-dai') }}</p>
               <p>
-                <b>{{ values.debtValue }} DAI</b>
+                <b>{{ values.debtValue }} {{ $t('dappsMCDMaker.dai') }}</b>
               </p>
             </div>
             <div class="value-block">
               <p>
                 {{
-                  $t('dappsMaker.stabilityFeeInMkr', {
+                  $t('dappsMCDMaker.stability-fee-in-mkr', {
                     value: displayFixedValue(
                       displayPercentValue(values.stabilityFee)
                     )
@@ -66,7 +66,7 @@
                 }}
               </p>
               <p>
-                <b>{{ getfeeOwed }} MKR</b>
+                <b>{{ getfeeOwed }} {{ $t('dappsMCDMaker.mkr') }}</b>
               </p>
             </div>
           </div>
@@ -75,21 +75,44 @@
         <div class="buttons">
           <div v-if="needsDaiApprove">
             <standard-button
-              :options="approveDaiButton"
-              @click.native="approveDai"
+              :options="{
+                title: $t('dappsMCDMaker.approve-dai'),
+                buttonStyle: 'green-border',
+                fullWidth: true,
+                noMinWidth: true
+              }"
+              :click-function="approveDai"
             />
           </div>
           <div v-if="needsMkrApprove">
             <standard-button
-              :options="approveMkrButton"
-              @click.native="approveMkr"
+              :options="{
+                title: $t('dappsMCDMaker.approve-maker'),
+                buttonStyle: 'green-border',
+                fullWidth: true,
+                noMinWidth: true
+              }"
+              :click-function="approveMkr"
             />
           </div>
         </div>
         <div class="buttons">
-          <standard-button :options="cancelButton" @click.native="closeModal" />
           <standard-button
-            :options="closeButton"
+            :options="{
+              title: $('common.cancel'),
+              buttonStyle: 'green-border',
+              fullWidth: true,
+              noMinWidth: true
+            }"
+            :click-function="closeModal"
+          />
+          <standard-button
+            :options="{
+              title: $t('common.close'),
+              buttonStyle: 'green',
+              fullWidth: true,
+              noMinWidth: true
+            }"
             :button-disabled="canClose ? false : true"
             :click-function="closeCdp"
           />
@@ -130,11 +153,9 @@ export default {
       type: Object,
       default: function() {
         return {
-          maxPethDraw: '',
           maxEthDraw: '',
           maxUsdDraw: '',
           ethCollateral: '',
-          pethCollateral: '',
           usdCollateral: '',
           debtValue: '',
           maxDai: '',
@@ -148,6 +169,18 @@ export default {
       default: function() {
         return {};
       }
+    },
+    activeCdpId: {
+      type: Number,
+      default: 0
+    },
+    makerActive: {
+      type: Boolean,
+      default: false
+    },
+    getValueOrFunction: {
+      type: Function,
+      default: function() {}
     }
   },
   data() {
@@ -161,30 +194,6 @@ export default {
       textValues: {},
       mkrToken: {},
       daiToken: {},
-      approveMkrButton: {
-        title: 'Approve Maker',
-        buttonStyle: 'green-border',
-        fullWidth: true,
-        noMinWidth: true
-      },
-      approveDaiButton: {
-        title: 'Approve Dai',
-        buttonStyle: 'green-border',
-        fullWidth: true,
-        noMinWidth: true
-      },
-      cancelButton: {
-        title: 'Cancel',
-        buttonStyle: 'green-border',
-        fullWidth: true,
-        noMinWidth: true
-      },
-      closeButton: {
-        title: 'Close',
-        buttonStyle: 'green',
-        fullWidth: true,
-        noMinWidth: true
-      },
       suppliedFrom: {
         symbol: 'ETH',
         name: 'Ethereum'
@@ -198,7 +207,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['account', 'gasPrice', 'web3', 'network', 'ens']),
+    ...mapState('main', ['account', 'gasPrice', 'web3', 'network', 'ens']),
     getfeeOwed() {
       const result = this.values.governanceFeeOwed;
       return this.displayFixedValue(result, 8);
@@ -253,26 +262,28 @@ export default {
       return false;
     },
     needsDaiApprove() {
-      if (toBigNumber(this.values.proxyAllowanceDai).gt(0)) {
+      if (toBigNumber(this.getProxyAllowances()['DAI']).gt(0)) {
         if (
-          toBigNumber(this.values.proxyAllowanceDai).lte(this.values.debtValue)
+          toBigNumber(this.getProxyAllowances()['DAI']).lte(
+            this.values.debtValue
+          )
         ) {
           return true;
         }
       }
-      return toBigNumber(this.values.proxyAllowanceDai).eq(0);
+      return toBigNumber(this.getProxyAllowances()['DAI']).eq(0);
     },
     needsMkrApprove() {
-      if (toBigNumber(this.values.proxyAllowanceMkr).gt(0)) {
+      if (toBigNumber(this.getProxyAllowances()['MKR']).gt(0)) {
         if (
-          toBigNumber(this.values.proxyAllowanceMkr).lt(
+          toBigNumber(this.getProxyAllowances()['MKR']).lt(
             this.values.governanceFeeOwed
           )
         ) {
           return true;
         }
       }
-      return toBigNumber(this.values.proxyAllowanceMkr).eq(0);
+      return toBigNumber(this.getProxyAllowances()['MKR']).eq(0);
     },
     canClose() {
       return (
@@ -291,11 +302,43 @@ export default {
   async mounted() {
     this.destAddress = this.account.address;
     this.getBalances();
-    this.$refs.modal.$on('shown', async () => {
+    this.$refs.modal.$on('shown', () => {
+      this.cdpId = this.$route.params.cdpId;
+      this.isVisible = true;
+      this.amount = 0;
+      this.getActiveCdp();
       this.getBalances();
     });
+
+    this.$refs.modal.$on('hidden', () => {
+      this.isVisible = false;
+    });
+
+    if (this.makerActive) {
+      this.getActiveCdp();
+    }
   },
   methods: {
+    getActiveCdp() {
+      if (this.cdpId > 0) {
+        this.currentCdp = this.getValueOrFunction('getCdp')(this.cdpId);
+        this.currentCdpType = this.currentCdp.cdpCollateralType;
+        this.$forceUpdate();
+      }
+    },
+    getProxyAllowances() {
+      const allowances = this.getValueOrFunction('proxyAllowances');
+      if (allowances) {
+        return allowances;
+      }
+      return {};
+    },
+    getSystemValues(name) {
+      const vals = this.getValueOrFunction('systemValues');
+      if (vals) {
+        return vals[name];
+      }
+    },
     closeModal() {
       this.$refs.modal.hide();
     },
@@ -305,8 +348,9 @@ export default {
       }, 200);
     },
     async closeCdp() {
-      this.delayCloseModal();
-      this.$emit('closeCdp');
+      if (this.currentCdp) {
+        this.delayCloseModal();
+      }
     },
     displayPercentValue(raw) {
       if (!BigNumber.isBigNumber(raw)) raw = new BigNumber(raw);

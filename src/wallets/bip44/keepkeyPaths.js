@@ -24,7 +24,10 @@ import {
   solidum,
   dexon,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  rskMainnet,
+  rskTestnet,
+  ethercore
 } from './paths';
 export default [
   keepkeyEthereum,
@@ -52,5 +55,8 @@ export default [
   solidum,
   dexon,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  rskMainnet,
+  rskTestnet,
+  ethercore
 ];

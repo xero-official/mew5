@@ -1,7 +1,7 @@
 <template>
   <b-modal
     ref="networkAndAddress"
-    :title="$t('accessWallet.networkAndAddress')"
+    :title="$t('accessWallet.network-addr.string')"
     hide-footer
     class="bootstrap-modal nopadding modal-network-and-address"
     centered
@@ -22,12 +22,11 @@
               ({{ selectedNetwork.type.name }} - {{ selectedNetwork.service }})
             </p>
           </div>
-          <p v-if="false" class="right-button">{{ $t('common.cancel') }}</p>
         </b-btn>
         <b-collapse
           id="collapse1"
-          v-model="showCollapse1"
           class="collapse-content"
+          accordion="networkaddraccordion"
         >
           <ul class="networks">
             <li
@@ -42,8 +41,7 @@
                     alt
                   />
                   <div v-else class="no-icon">
-                    <p>No</p>
-                    <p>Icon</p>
+                    <p>{{ $t('common.no-icon') }}</p>
                   </div>
                 </div>
                 <p>{{ key }}</p>
@@ -59,7 +57,7 @@
                       ? 'current-network'
                       : ''
                   "
-                  @click="switchNetwork(net)"
+                  @click="locSwitchNetwork(net)"
                 >
                   {{ net.service }}
                 </p>
@@ -75,11 +73,12 @@
           variant="primary"
         >
           <p class="button-number">2</p>
-          <p>{{ $t('common.address') }}</p>
+          <p>{{ $t('common.addr') }}</p>
         </b-btn>
         <b-collapse
           id="collapse2"
-          v-model="showCollapse2"
+          accordion="networkaddraccordion"
+          visible
           class="collapse-content"
         >
           <!-- Derivation Path Drop down -->
@@ -88,32 +87,39 @@
             class="content-container-1"
           >
             <div class="hd-derivation">
-              <h4>{{ $t('accessWallet.hdDerivationPath') }}</h4>
+              <h4>{{ $t('accessWallet.path.hd-derivation') }}</h4>
               <div class="dropdown-button-container">
                 <b-dropdown
                   id="hd-derivation-path"
-                  :text="getPathLabel(selectedPath)"
+                  :text="`${getPathLabel(selectedPath)} (${selectedPath}`"
                   right
                   class="dropdown-button-2"
                 >
                   <b-dropdown-item
                     v-for="(val, key) in availablePaths"
-                    :class="selectedPath === val.path ? 'active' : ''"
                     :key="'base' + key"
+                    :class="[
+                      selectedPath === val.path ? 'active' : '',
+                      'dropdown-paths'
+                    ]"
                     @click="changePath(key)"
-                    >{{ val.label }}</b-dropdown-item
                   >
-                  <b-dropdown-divider />
-                  <b-dropdown-item>
-                    {{ $t('accessWallet.customPaths') }}
+                    {{ val.label }}
+                    <span>({{ val.path }})</span>
                   </b-dropdown-item>
+                  <b-dropdown-divider />
+                  <b-dropdown-item>{{
+                    $t('accessWallet.path.custom')
+                  }}</b-dropdown-item>
                   <b-dropdown-item
                     v-for="(val, key) in customPaths"
-                    :class="selectedPath === val.path ? 'active' : ''"
                     :key="key"
+                    :class="selectedPath === val.path ? 'active' : ''"
                   >
                     <div class="custom-networks">
-                      <div @click="changePath(key)">{{ val.label }}</div>
+                      <div @click="changePath(key)">
+                        {{ val.label }} <span>({{ val.path }})</span>
+                      </div>
                       <span>
                         <i
                           class="fa fa-times-circle"
@@ -122,9 +128,9 @@
                       </span>
                     </div>
                   </b-dropdown-item>
-                  <b-dropdown-item @click="showCustomPathInput">
-                    {{ $t('accessWallet.addCustomPath') }}
-                  </b-dropdown-item>
+                  <b-dropdown-item @click="showCustomPathInput">{{
+                    $t('accessWallet.path.add-custom')
+                  }}</b-dropdown-item>
                 </b-dropdown>
               </div>
             </div>
@@ -133,20 +139,24 @@
               class="error-message-container"
             >
               {{
-                $t('accessWallet.invalidPathDesc', { path: invalidPath.path })
+                $t('accessWallet.path.invalid-desc', { path: invalidPath.path })
               }}
             </p>
             <p v-show="!customPathInput" class="derivation-brands monospace">
               {{ getPathLabel(selectedPath) }} ({{ selectedPath }})
             </p>
             <div v-show="customPathInput" class="custom-path-container">
-              <label for="customPathLabel">{{ $t('common.alias') }}</label>
+              <label for="customPathLabel">{{
+                $t('accessWallet.path.alias')
+              }}</label>
               <input
                 id="customPathLabel"
                 v-model="customPath.label"
                 placeholder="my custom path"
               />
-              <label for="customPathInput">{{ $t('common.path') }}</label>
+              <label for="customPathInput">{{
+                $t('accessWallet.path.string')
+              }}</label>
               <input
                 id="customPathInput"
                 v-model="customPath.path"
@@ -155,8 +165,8 @@
               <button class="submit-button cancel" @click="showCustomPathInput">
                 {{ $t('common.cancel') }}
               </button>
-              <button class="submit-button submit" @click="addCustomPath">
-                {{ $t('accessWallet.addCustomPath') }}
+              <button class="submit-button submit" @click="locAddCustomPath">
+                {{ $t('accessWallet.path.add-custom') }}
               </button>
             </div>
           </div>
@@ -164,19 +174,19 @@
           <div class="content-container-2">
             <div class="address-block-container">
               <div class="block-title">
-                <h4>{{ $t('accessWallet.interactAddr') }}</h4>
+                <h4>{{ $t('accessWallet.network-addr.addr-to-interact') }}</h4>
               </div>
 
               <ul class="address-block table-header fours">
-                <li>{{ $t('accessWallet.id') }}</li>
-                <li>{{ $t('common.address') }}</li>
-                <li>{{ $t('common.balance') }}</li>
+                <li>{{ $t('accessWallet.network-addr.id') }}</li>
+                <li>{{ $t('common.addr') }}</li>
+                <li>{{ $t('common.balance.string') }}</li>
               </ul>
 
               <ul
                 v-for="account in HDAccounts"
-                :data-address="'address' + account.index"
                 :key="account.index"
+                :data-address="'address' + account.index"
                 :class="[
                   selectedId === 'address' + account.index ? 'selected' : '',
                   'address-block address-data fours'
@@ -219,26 +229,27 @@
             </div>
           </div>
           <!-- .content-container-2 -->
-          <div class="accept-terms">
-            <label class="checkbox-container">
-              {{ $t('accessWallet.acceptTerms') }}
-              <router-link to="/terms-and-conditions"
+        </b-collapse>
+        <div class="accept-terms">
+          <label class="checkbox-container">
+            <i18n path="accessWallet.accept-terms">
+              <router-link slot="terms" to="/terms-of-service"
                 >{{ $t('common.terms') }}.</router-link
               >
-              <input v-model="acceptTerms" type="checkbox" />
-              <span class="checkmark" />
-            </label>
-          </div>
-          <div class="button-container">
-            <b-btn
-              :disabled="!isDisabled"
-              class="mid-round-button-green-filled close-button"
-              @click.prevent="unlockWallet"
-              >{{ $t('common.accessMyWallet') }}</b-btn
-            >
-          </div>
-          <customer-support />
-        </b-collapse>
+            </i18n>
+            <input v-model="acceptTerms" type="checkbox" />
+            <span class="checkmark" />
+          </label>
+        </div>
+        <div class="button-container">
+          <b-btn
+            :disabled="!isDisabled"
+            class="mid-round-button-green-filled close-button"
+            @click.prevent="unlockWallet"
+            >{{ $t('common.wallet.access-my') }}</b-btn
+          >
+        </div>
+        <customer-support />
       </div>
     </div>
     <!-- .modal-content-container -->
@@ -247,7 +258,7 @@
 
 <script>
 import CustomerSupport from '@/components/CustomerSupport';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { Misc, Toast, pathHelpers } from '@/helpers';
 import web3utils from 'web3-utils';
 import BigNumber from 'bignumber.js';
@@ -279,20 +290,19 @@ export default {
       customPathInput: false,
       currentWallet: null,
       customPath: { label: '', dpath: '' },
-      showCollapse1: false,
-      showCollapse2: true,
+      showCollapse: false,
       ledgerType: LEDGER_TYPE,
       acceptTerms: false
     };
   },
   computed: {
-    ...mapState([
+    ...mapState('main', [
       'network',
       'Networks',
       'customPaths',
       'path',
       'web3',
-      'wallet'
+      'wallets'
     ]),
     selectedNetwork() {
       return this.network;
@@ -323,9 +333,16 @@ export default {
     });
   },
   methods: {
-    switchNetwork(network) {
-      this.$store.dispatch('switchNetwork', network).then(() => {
-        this.$store.dispatch('setWeb3Instance');
+    ...mapActions('main', [
+      'switchNetwork',
+      'setWeb3Instance',
+      'removeCustomPath',
+      'addCustomPath',
+      'decryptWallet'
+    ]),
+    locSwitchNetwork(network) {
+      this.switchNetwork(network).then(() => {
+        this.setWeb3Instance();
         this.currentIndex = 0;
         this.setHDAccounts();
       });
@@ -354,22 +371,20 @@ export default {
       return new BigNumber(web3utils.fromWei(bal, 'ether')).toFixed(3);
     },
     removeCustomPath(path) {
-      this.$store.dispatch('removeCustomPath', path).then(() => {
+      this.removeCustomPath(path).then(() => {
         this.getPaths();
       });
     },
-    addCustomPath() {
+    locAddCustomPath() {
       const customPath = pathHelpers.checkCustomPath(this.customPath.path);
       if (customPath) {
         this.customPath.path = customPath;
-        this.$store
-          .dispatch('addCustomPath', {
-            label: this.customPath.label,
-            path: customPath
-          })
-          .then(() => {
-            this.getPaths();
-          });
+        this.addCustomPath({
+          label: this.customPath.label,
+          path: customPath
+        }).then(() => {
+          this.getPaths();
+        });
         this.showCustomPathInput(); // reset the path input
       } else {
         this.invalidPath = this.customPath;
@@ -418,8 +433,7 @@ export default {
       });
     }, 1000),
     unlockWallet() {
-      this.$store
-        .dispatch('decryptWallet', [this.currentWallet])
+      this.decryptWallet([this.currentWallet])
         .then(() => {
           if (this.wallet !== null) {
             if (!this.$route.path.split('/').includes('interface')) {
@@ -437,7 +451,7 @@ export default {
         });
     },
     async setHDAccounts() {
-      if (!this.web3.eth) this.$store.dispatch('setWeb3Instance');
+      if (!this.web3.eth) this.setWeb3Instance();
       this.HDAccounts = [];
       for (
         let i = this.currentIndex;
@@ -465,16 +479,18 @@ export default {
       this.setHDAccounts();
     },
     getPathLabel(path) {
-      for (const _p in this.availablePaths) {
-        if (this.availablePaths[_p].path === path) {
-          return this.availablePaths[_p].label;
-        }
-      }
       for (const _p in this.customPaths) {
         if (this.customPaths[_p].path === path) {
           return this.customPaths[_p].label;
         }
       }
+
+      for (const _p in this.availablePaths) {
+        if (this.availablePaths[_p].path === path) {
+          return this.availablePaths[_p].label;
+        }
+      }
+
       return 'Unknown';
     },
     getPaths() {
@@ -492,5 +508,15 @@ export default {
 
 .activeConn {
   color: gray;
+}
+</style>
+
+<style lang="scss">
+.dropdown-paths {
+  .dropdown-item {
+    align-items: center;
+    display: flex !important;
+    justify-content: space-between;
+  }
 }
 </style>

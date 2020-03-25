@@ -1,7 +1,7 @@
 <template>
   <div class="providers-radio-selector">
     <!-- =========================================================================== -->
-    <div v-show="providerData.length > 0" class="radio-button-container">
+    <div v-show="displayToShow === 'rates'" class="radio-button-container">
       <ul>
         <li
           v-for="(provider, idx) in providerData"
@@ -13,12 +13,11 @@
           <div class="mew-custom-form__radio-button">
             <input
               v-show="providerData.length > 0"
-              v-model="providerChosen"
               :id="provider.provider"
+              v-model="providerChosen"
               :value="provider.provider"
               type="radio"
               name="provider"
-              @input="setSelectedProvider(provider.provider)"
             />
 
             <label :for="provider.provider" />
@@ -63,6 +62,9 @@
             <p :class="[maxCheck(provider) ? 'error-message-container' : '']">
               {{ maxNote(provider) }}
             </p>
+            <span class="slippage-text">{{
+              otherTextDisplay(provider.additional.display)
+            }}</span>
           </div>
         </li>
       </ul>
@@ -74,13 +76,14 @@
     </div>
     <!-- Animation while retrieving rates for available providers when switching to and from currencies-->
     <div
-      v-show="switchCurrencyOrder"
+      v-show="displayToShow === 'switchCurrencyOrder'"
       class="radio-button-container animated-background"
     >
       <ul>
         <li v-for="provider in providersFound" :key="provider">
           <div class="mew-custom-form__radio-button">
-            <input type="radio" name="provider" /> <label :for="provider" />
+            <input type="radio" name="provider" />
+            <label :for="provider" />
           </div>
           <div class="provider-image">
             <img :src="providerLogo(provider)" alt />
@@ -91,13 +94,14 @@
     </div>
     <!-- Animation while retrieving rates for available providers -->
     <div
-      v-show="loadingData"
+      v-show="displayToShow === 'loadingData'"
       class="radio-button-container animated-background"
     >
       <ul>
         <li v-for="provider in providersFound" :key="provider">
           <div class="mew-custom-form__radio-button">
-            <input type="radio" name="provider" /> <label :for="provider" />
+            <input type="radio" name="provider" />
+            <label :for="provider" />
           </div>
           <div class="provider-image">
             <img :src="providerLogo(provider)" alt />
@@ -114,11 +118,11 @@
     <!-- Animation while retrieving the supporting providers rates -->
     <!-- =========================================================================== -->
     <div
-      v-show="loadingProviderRates"
+      v-show="displayToShow === 'loadingProviderRates'"
       class="radio-button-container animated-background"
     >
       <div class="provider-loading-message">
-        {{ $t('interface.loadingProviders') }}
+        {{ $t('swap.providers.loading-rates') }}
       </div>
       <provider-info-list
         :all-supported-providers="allSupportedProviders"
@@ -128,7 +132,7 @@
     <!-- Message When Error Seems to have occured while retrieving rate -->
     <!-- =========================================================================== -->
     <div
-      v-show="loadingProviderError && !noAvaliableProviders"
+      v-show="displayToShow === 'loadingProviderError'"
       class="radio-button-container animated-background"
     >
       <ul>
@@ -139,25 +143,57 @@
           <div class="provider-image">
             <img :src="providerLogo('mew')" alt />
           </div>
-          <div>
-            {{ $t('interface.loadRateError') }}
-            {{ noProvidersPair.fromCurrency }} {{ $t('interface.articleTo') }}
-            {{ noProvidersPair.toCurrency }}
-            {{ $t('interface.pleaseTryAgain') }}
-          </div>
+          <i18n tag="div" path="swap.providers.load-rate-error">
+            <span slot="from-currency">{{ noProvidersPair.fromCurrency }}</span>
+            <span slot="to-currency">{{ noProvidersPair.toCurrency }}</span>
+          </i18n>
         </li>
       </ul>
     </div>
     <!-- Message when no valid provider is found for the selected pair -->
     <!-- =========================================================================== -->
-    <div v-show="noAvaliableProviders" class="radio-button-container">
+    <div
+      v-show="displayToShow === 'noAvailableProviders'"
+      class="radio-button-container"
+    >
       <div class="no-provider-message">
-        {{ $t('interface.noProviderFound') }}
+        {{ $t('swap.providers.no-provider-found') }}
       </div>
       <ul>
         <provider-info-list
           :all-supported-providers="allSupportedProviders"
           :unavailable-providers="unavailableProviders"
+        />
+      </ul>
+    </div>
+    <!-- =========================================================================== -->
+    <!-- Message when offline -->
+    <!-- =========================================================================== -->
+    <div v-show="displayToShow === 'offline'" class="radio-button-container">
+      <div class="no-provider-message">
+        {{ $t('swap.warning.no-swap-offline') }}
+      </div>
+      <ul>
+        <provider-info-list
+          :all-supported-providers="allSupportedProviders"
+          :unavailable-providers="unavailableProviders"
+        />
+      </ul>
+    </div>
+    <!-- =========================================================================== -->
+    <!-- Message when not mainnet -->
+    <!-- =========================================================================== -->
+    <div
+      v-show="displayToShow === 'onlyMainNet'"
+      class="radio-button-container"
+    >
+      <div class="no-provider-message">
+        {{ $t('swap.warning.swap-only-mainnet') }}
+      </div>
+      <ul>
+        <provider-info-list
+          :all-supported-providers="allSupportedProviders"
+          :unavailable-providers="allSupportedProviders"
         />
       </ul>
     </div>
@@ -172,9 +208,11 @@ import KyberNetwork from '@/assets/images/etc/kybernetwork.png';
 import Bity from '@/assets/images/etc/bity.png';
 import Simplex from '@/assets/images/etc/simplex.png';
 import Changelly from '@/assets/images/etc/changelly.png';
-import bityBeta from '@/assets/images/etc/bitybeta.png';
+
+import { providerNames, fiat } from '@/partners';
 
 import ProviderInfoList from './ProviderInfoList';
+import { mapState } from 'vuex';
 
 const toBigNumber = num => {
   return new BigNumber(num);
@@ -227,6 +265,10 @@ export default {
         return {};
       }
     },
+    providerSelectedName: {
+      type: String,
+      default: ''
+    },
     fromValue: {
       type: Number,
       default: 0
@@ -242,6 +284,7 @@ export default {
   },
   data() {
     return {
+      onMainNet: true,
       providerChosen: '',
       otherProviderList: [],
       logos: {
@@ -251,13 +294,41 @@ export default {
         simplex: Simplex,
         changelly: Changelly
       },
-      betaLogos: {
-        bity: bityBeta
-      }
+      betaLogos: {},
+      providerNames: providerNames,
+      fiat: fiat.map(item => item.symbol)
     };
   },
   computed: {
-    noAvaliableProviders() {
+    ...mapState('main', ['online', 'network']),
+    displayToShow() {
+      if (!this.online) {
+        return 'offline';
+      }
+      if (this.network.type.name !== 'ETH') {
+        return 'onlyMainNet';
+      }
+      if (this.loadingProviderRates) {
+        return 'loadingProviderRates';
+      }
+      if (this.loadingData) {
+        return 'loadingData';
+      }
+      if (this.providerData.length > 0) {
+        return 'rates';
+      }
+      if (this.switchCurrencyOrder) {
+        return 'switchCurrencyOrder';
+      }
+      if (this.noAvailableProviders) {
+        return 'noAvailableProviders';
+      }
+      if (this.loadingProviderError && !this.noAvailableProviders) {
+        return 'loadingProviderError';
+      }
+      return 'loadingData';
+    },
+    noAvailableProviders() {
       return (
         (this.providersFound.length === 0 || this.providerData.length === 0) &&
         !this.loadingData
@@ -275,8 +346,24 @@ export default {
         return this.allSupportedProviders.filter(entry => {
           return !activeProviders.includes(entry);
         });
-      } else if (this.noAvaliableProviders) {
+      } else if (this.noAvailableProviders) {
         return this.allSupportedProviders;
+      }
+      return null;
+    }
+  },
+  watch: {
+    loadingData(val) {
+      if (this.providerSelectedName !== '' && !val) {
+        this.$nextTick(() => {
+          this.$emit('selectedProvider', this.providerSelectedName);
+          const clickedEl = document.getElementsByClassName(
+            this.providerSelectedName
+          )[0];
+          clickedEl.classList.add('radio-selected');
+          const inputEl = document.getElementById(this.providerSelectedName);
+          inputEl.checked = true;
+        });
       }
     }
   },
@@ -339,30 +426,50 @@ export default {
     },
     minNote(details) {
       if (details.minValue > 0) {
+        const decimals =
+          details.provider === this.providerNames.simplex ? 2 : 6;
         return [
-          `${toBigNumber(details.minValue).toFixed(6)} ${
+          `${toBigNumber(details.minValue).toFixed(decimals)} ${
             details.fromCurrency
-          } (From Min.)`
+          } (${this.$t('swap.from-min')}.)`
         ];
       }
       return '';
     },
     maxNote(details) {
       if (details.maxValue > 0) {
-        return `${toBigNumber(details.maxValue).toFixed(6)} ${
+        const decimals =
+          details.provider === this.providerNames.simplex ? 2 : 6;
+        return `${toBigNumber(details.maxValue).toFixed(decimals)} ${
           details.fromCurrency
-        } (Max.)`;
+        } (${this.$t('swap.max')}.)`;
       }
       return '';
     },
     formatRateDisplay(fromValue, fromCurrency, toValue, toCurrency) {
+      const decimalsFrom = this.fiat.includes(fromCurrency) ? 2 : 6;
+      const decimalsTo = this.fiat.includes(toCurrency) ? 2 : 6;
       return `${toBigNumber(fromValue).toFixed(
-        6
-      )} ${fromCurrency} = ${toBigNumber(toValue).toFixed(6)} ${toCurrency}`;
+        decimalsFrom
+      )} ${fromCurrency} = ${toBigNumber(toValue).toFixed(
+        decimalsTo
+      )} ${toCurrency}`;
     },
     normalizedRateDisplay(source) {
+      const decimals = source.provider === this.providerNames.simplex ? 2 : 6;
+      const fromValue = toBigNumber(source.fromValue)
+        .toFixed(decimals)
+        .toString();
       const toValue = this.valueForRate(this.fromValue, source.rate);
-      return `${source.fromValue} ${source.fromCurrency} = ${toValue} ${source.toCurrency}`;
+      return `${fromValue} ${source.fromCurrency} = ${toValue} ${source.toCurrency}`;
+    },
+    otherTextDisplay(contentDetails) {
+      if (!contentDetails) return;
+      if (contentDetails.txtKey) {
+        return this.$t(`swap.providers.${contentDetails.txtKey}`, {
+          value: contentDetails.value
+        });
+      }
     },
     valueForRate(rate, value) {
       return toBigNumber(value)

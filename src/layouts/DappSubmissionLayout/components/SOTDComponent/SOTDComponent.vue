@@ -1,19 +1,22 @@
-<template>
-  <div class="mt-4 sotd-wrapper">
-    <div v-show="show" class="sotd-container">
+<template functional>
+  <div class="sotd-wrapper">
+    <div class="mt-5 ml-5 sotd-container">
       <div class="text-container">
+        <p class="header">{{ parent.$t('dappsSubmission.sotd.title') }}</p>
         <img
+          :alt="parent.$t('dappsSubmission.sotd.name')"
           src="~@/assets/images/icons/dapps/sotd.png"
-          alt="State of the DApps"
         />
-        <p>
-          A joint effort with State of the DApps. By submitting your dapp
-          information, you acknowledge that your Dapp will be listed on
-          <a href="https://www.stateofthedapps.com/">stateofthedapps.com</a>
-        </p>
       </div>
-      <div>
-        <i class="fa fa-times" @click="hideText()" />
+      <div class="info-box">
+        <i18n tag="p" path="dappsSubmission.sotd.info">
+          <a
+            slot="url"
+            rel="noopener noreferrer"
+            href="https://www.stateofthedapps.com/"
+            >{{ parent.$t('dappsSubmission.sotd.url') }}</a
+          >.
+        </i18n>
       </div>
     </div>
   </div>
@@ -21,16 +24,18 @@
 
 <script>
 export default {
-  data() {
-    return {
-      show: true
-    };
-  },
-  methods: {
-    hideText() {
-      if (this.show === true) {
-        this.show = false;
-      }
+  props: {
+    title: {
+      type: String,
+      default: ''
+    },
+    info: {
+      type: String,
+      default: ''
+    },
+    url: {
+      type: String,
+      default: ''
     }
   }
 };

@@ -22,7 +22,7 @@
 
       <div class="block-center">
         <div class="convert-icon">
-          <img src="~@/assets/images/icons/swap.svg" alt />
+          <img src="~@/assets/images/icons/swap-widget.svg" alt />
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['web3'])
+    ...mapState('main', ['web3'])
   },
   watch: {
     valueLeft(newVal) {

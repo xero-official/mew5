@@ -1,7 +1,7 @@
 <template>
   <!--- <b-modal
     ref="mewConnect"
-    :title="$t('accessWallet.mewConnectTitle')"
+    :title="$t('accessWallet.mewconnect.modal.title')"
     hide-footer
     class="bootstrap-modal nopadding modal-mew-connect"
     centered
@@ -15,31 +15,56 @@
       </div>
       <div class="d-block content-container text-center">
         <h3 class="modal-large-text">
-          {{ $t('accessWallet.mewConnectDesc1') }}
+          {{ $t('accessWallet.mewconnect.modal.text1') }}
         </h3>
       </div>
       <div class="appstore-button-container">
         <div class="links-container">
           <a
             v-if="canDownloadApple"
-            href="https://itunes.apple.com/us/app/mewconnect/id1391097156?mt=8"
+            href="https://itunes.apple.com/app/id1464614025"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img alt src="~@/assets/images/icons/appstore.svg" height="35" />
+            <img
+              alt
+              src="~@/assets/images/icons/button-app-store.png"
+              height="35"
+            />
           </a>
           <div v-else @click="openIpadModal">
-            <img alt src="~@/assets/images/icons/appstore.svg" height="35" />
+            <img
+              alt
+              src="~@/assets/images/icons/button-app-store.png"
+              height="35"
+            />
           </div>
           <a
-            href="http://play.google.com/store/apps/details?id=com.myetherwallet.mewconnect"
+            href="https://play.google.com/store/apps/details?id=com.myetherwallet.mewwallet"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img alt src="~@/assets/images/icons/google-play.svg" height="35" />
+            <img
+              alt
+              src="~@/assets/images/icons/button-google-play-color.png"
+              height="35"
+            />
+          </a>
+          <a
+            href="https://galaxystore.samsung.com/detail/com.myetherwallet.mewwallet?session_id=W_29942474fffbd49127ee223d697f1518"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              alt
+              src="~@/assets/images/icons/button-galaxy-store-color.png"
+              height="35"
+            />
           </a>
         </div>
-        <p class="download-now">{{ $t('accessWallet.mewConnectDesc2') }}</p>
+        <p class="download-now">
+          {{ $t('accessWallet.mewconnect.modal.text2') }}
+        </p>
       </div>
       <customer-support />
     </div>
@@ -49,7 +74,7 @@
 <script>
 import CustomerSupport from '@/components/CustomerSupport';
 import { MewConnectWallet } from '@/wallets';
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { Toast } from '@/helpers';
 import platform from 'platform';
 import IpadModal from '@/components/IpadModal';
@@ -66,7 +91,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['path', 'web3'])
+    ...mapState('main', ['path', 'web3'])
   },
   mounted() {
     this.canDownloadApple =
@@ -76,8 +101,8 @@ export default {
     this.$refs.mewConnect.$on('show', () => {
       new MewConnectWallet(this.codeDisplay)
         .then(wallet => {
-          if (!this.web3.eth) this.$store.dispatch('setWeb3Instance');
-          this.$store.dispatch('decryptWallet', [wallet]).then(() => {
+          if (!this.web3.eth) this.setWeb3Instance();
+          this.decryptWallet([wallet]).then(() => {
             this.$router.push({
               path: 'interface'
             });
@@ -92,6 +117,7 @@ export default {
     });
   },
   methods: {
+    ...mapActions('main', ['setWeb3Instance', 'decryptWallet']),
     codeDisplay(qrCode) {
       this.QrCode = qrCode;
     },

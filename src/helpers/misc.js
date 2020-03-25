@@ -4,9 +4,17 @@ import { isAddress } from './addressUtils';
 import url from 'url';
 import utils from 'web3-utils';
 import store from '@/store';
+import { isHexString, toBuffer as utilsToBuffer } from 'ethereumjs-util';
 import { uint, address, string, bytes, bool } from './solidityTypes';
 import xss from 'xss';
+import { MEW_CX } from '@/builds/configs/types';
 
+const toBuffer = v => {
+  if (isHexString(v)) {
+    return utilsToBuffer(v);
+  }
+  return Buffer.from(v);
+};
 const capitalize = value => {
   if (!value) return '';
   value = value.toString();
@@ -80,6 +88,7 @@ const isValidENSAddress = function(address) {
   }
   return address.lastIndexOf('.') != -1;
 };
+
 const sanitizeHex = hex => {
   hex = hex.substring(0, 2) == '0x' ? hex.substring(2) : hex;
   if (hex == '') return '0x';
@@ -157,7 +166,7 @@ const solidityType = inputType => {
 };
 
 const isDarklisted = addr => {
-  const storedDarklist = store.state.darklist.data;
+  const storedDarklist = store.state.main.darklist.data;
   const darklisted =
     storedDarklist > 0
       ? storedDarklist.findIndex(item => {
@@ -168,7 +177,7 @@ const isDarklisted = addr => {
         })
       : -1;
   const errMsg =
-    darklisted === -1 ? '' : store.state.darklist.data[darklisted].comment;
+    darklisted === -1 ? '' : store.state.main.darklist.data[darklisted].comment;
   const errObject = {
     error: darklisted === -1 ? false : true,
     msg: errMsg
@@ -222,6 +231,10 @@ const stripTags = content => {
   return string;
 };
 
+const isMewCx = () => {
+  return BUILD_TYPE === MEW_CX;
+};
+
 export default {
   isJson,
   doesExist,
@@ -241,5 +254,7 @@ export default {
   getService,
   stringToArray,
   isContractArgValid,
-  stripTags
+  stripTags,
+  isMewCx,
+  toBuffer
 };

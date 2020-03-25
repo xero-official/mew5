@@ -11,7 +11,7 @@
       </div>
       <div class="data-block">
         <div class="top-title">
-          Address
+          {{ $t('common.addr') }}
         </div>
         <p class="the-address">{{ account.address }}</p>
         <div class="buttons-container">
@@ -43,7 +43,7 @@ export default {
     return {};
   },
   computed: {
-    ...mapState(['wallet', 'online', 'web3', 'account'])
+    ...mapState('main', ['wallet', 'online', 'web3', 'account'])
   },
   watch: {},
   mounted() {},

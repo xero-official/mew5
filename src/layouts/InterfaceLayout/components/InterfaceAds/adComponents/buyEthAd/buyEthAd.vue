@@ -2,11 +2,18 @@
   <div class="buy-eth-ad">
     <div class="content-block">
       <div class="flex-vertical-center">
-        <div class="top-block">{{ $t('interface.buyWithCreditCard') }}</div>
+        <div class="top-block">{{ $t('interface.ads.buy-with-credit') }}</div>
         <div class="bottom-block">
           <standard-button
-            :options="sendButton"
-            @click.native="showSwapWidget"
+            :options="{
+              title: $t('accessWallet.hardware.modal.button-buy'),
+              buttonStyle: 'green-border',
+              helpCenter: false,
+              noMinWidth: true,
+              fullWidth: true,
+              paddingSmall: true
+            }"
+            :click-function="showSwapWidget"
           />
           <img alt class="cc-cards" src="@/assets/images/etc/visamaster.png" />
         </div>
@@ -17,12 +24,8 @@
 
 <script>
 import { mapState } from 'vuex';
-import SwapWidget from '@/components/SwapWidget';
 
 export default {
-  components: {
-    'swap-widget': SwapWidget
-  },
   props: {},
   data() {
     return {
@@ -35,19 +38,11 @@ export default {
       suppliedFrom: {
         symbol: 'USD',
         name: ''
-      },
-      sendButton: {
-        title: 'Buy Now',
-        buttonStyle: 'green-border',
-        helpCenter: false,
-        noMinWidth: true,
-        fullWidth: true,
-        paddingSmall: true
       }
     };
   },
   computed: {
-    ...mapState(['account', 'network', 'web3', 'online'])
+    ...mapState('main', ['account', 'online'])
   },
   watch: {},
   mounted() {},

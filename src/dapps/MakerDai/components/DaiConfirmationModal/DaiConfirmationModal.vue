@@ -2,7 +2,7 @@
   <div class="modal-container">
     <b-modal
       ref="modal"
-      :title="$t('dappsMaker.DAIConfirmation')"
+      :title="$t('dappsMCDMaker.dai-confirmation')"
       centered
       class="bootstrap-modal bootstrap-modal-wide padding-40-20"
       hide-footer
@@ -13,14 +13,20 @@
         <div class="tx-amount">
           <div>
             <div class="interface__block-title">
-              {{ $t('dappsMaker.collateral') }}
+              {{ $t('dappsMCDMaker.collateral') }}
             </div>
 
             <div class="amount-block">
               <div class="icon">
-                <img src="~@/assets/images/currency/eth.svg" />
+                <i
+                  v-if="getIcon(currency) !== ''"
+                  :class="['icon', 'cc', getIcon(currency), 'cc-icon']"
+                />
               </div>
-              <div class="amount">{{ collateral }}<span>ETH</span></div>
+
+              <div class="amount">
+                {{ collateral }}<span>{{ currency }}</span>
+              </div>
             </div>
           </div>
           <div class="arrow">
@@ -28,46 +34,56 @@
           </div>
           <div>
             <div class="interface__block-title">
-              {{ $t('dappsMaker.generate') }}
+              {{ $t('dappsMCDMaker.generate') }}
             </div>
             <div class="amount-block">
               <div class="icon">
                 <img src="~@/assets/images/currency/coins/AllImages/DAI.svg" />
               </div>
-              <div class="amount">{{ generate }}<span>DAI</span></div>
+              <div class="amount">
+                {{ generate }}<span>{{ $t('dappsMCDMaker.dai') }}</span>
+              </div>
             </div>
           </div>
         </div>
         <div class="detail-info">
-          <expending-option :title="$t('dappsMaker.details')">
+          <expanding-option :title="$t('dappsMCDMaker.details')">
             <ul>
               <li>
-                <p>{{ $t('dappsMaker.liquidPrice') }} (ETH/USD)</p>
+                <p>
+                  {{ $t('dappsMCDMaker.liquid-price') }} ({{ currency }}/USD)
+                </p>
                 <p class="bold">{{ liquidationPrice }} USD</p>
               </li>
               <li>
-                <p>{{ $t('dappsMaker.currentPrice') }} (ETH/USD)</p>
+                <p>
+                  {{ $t('dappsMCDMaker.current-price') }} ({{ currency }}/USD)
+                </p>
                 <p>{{ currentPrice }} USD</p>
               </li>
               <li>
-                <p>{{ $t('dappsMaker.liquidationPenalty') }}</p>
+                <p>{{ $t('dappsMCDMaker.liquidation-penalty') }}</p>
                 <p>{{ liquidationPenalty }}%</p>
               </li>
               <li>
-                <p>{{ $t('dappsMaker.collateralRatio') }}</p>
+                <p>{{ $t('dappsMCDMaker.collateral-ratio') }}</p>
                 <p class="bold">{{ collatRatio }} %</p>
               </li>
               <li>
-                <p>{{ $t('dappsMaker.minimumRatio') }}</p>
+                <p>{{ $t('dappsMCDMaker.minimum-ratio') }}</p>
                 <p>{{ minRatio }}%</p>
               </li>
             </ul>
-          </expending-option>
+          </expanding-option>
         </div>
         <div class="button-container">
           <standard-button
-            :options="confirmButton"
-            @click.native="confirmClicked"
+            :options="{
+              title: $t('dappsMCDMaker.confirm-and-create-vault'),
+              buttonStyle: 'green',
+              helpCenter: true
+            }"
+            :click-function="confirmClicked"
           />
         </div>
       </div>
@@ -76,12 +92,13 @@
 </template>
 
 <script>
-import ExpendingOption from '@/components/ExpendingOption';
+import ExpandingOption from '@/components/ExpandingOption';
 import StandardButton from '@/components/Buttons/StandardButton';
+import { hasIcon } from '@/partners';
 
 export default {
   components: {
-    'expending-option': ExpendingOption,
+    'expanding-option': ExpandingOption,
     'standard-button': StandardButton
   },
   props: {
@@ -116,21 +133,30 @@ export default {
     generate: {
       type: String,
       default: 'Error'
+    },
+    currency: {
+      type: String,
+      default: 'Error'
     }
-  },
-  data() {
-    return {
-      confirmButton: {
-        title: this.$t('dappsMaker.confirmAndCreate'),
-        buttonStyle: 'green',
-        helpCenter: true
-      }
-    };
   },
   computed: {},
   watch: {},
   mounted() {},
   methods: {
+    iconFetcher(currency) {
+      let icon;
+      try {
+        // eslint-disable-next-line
+        icon = require(`@/assets/images/currency/coins/AllImages/${currency}.svg`);
+      } catch (e) {
+        // eslint-disable-next-line
+        return require(`@/assets/images/icons/web-solution.svg`);
+      }
+      return icon;
+    },
+    getIcon(currency) {
+      return hasIcon(currency);
+    },
     confirmClicked() {
       this.opencdp();
     }

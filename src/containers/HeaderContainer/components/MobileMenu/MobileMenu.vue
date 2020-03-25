@@ -1,6 +1,7 @@
 <template>
   <div class="mobile-menu">
     <mobile-language-selector
+      v-show="!isMewCx"
       :open="langSelectorOpen"
       @isopen="langSelectorOpen = false"
       @currentlang="langChange"
@@ -24,7 +25,11 @@
           :class="!isOnTop && !isMenuOpen ? 'small-menu' : ''"
           class="logo-image--container"
         >
-          <img class="logo" src="~@/assets/images/short-hand-logo.png" alt />
+          <img
+            :src="require(`@/assets/images/short-hand-logo-${buildType}.png`)"
+            class="logo"
+            alt
+          />
         </div>
       </router-link>
       <div class="mobile-menu-button--container">
@@ -61,20 +66,20 @@
               "
             >
               <div class="menu-link-block">
-                <div>{{ $t('header.home') }}</div>
+                <div>{{ $t('common.home') }}</div>
                 <i class="fa fa-angle-right" aria-hidden="true"></i>
               </div>
             </router-link>
           </li>
-          <li v-if="isHomePage">
+          <li v-if="isHomePage && !isMewCx">
             <router-link to="/#about-mew" @click.native="isMenuOpen = false">
               <div class="menu-link-block">
-                <div>{{ $t('header.about') }}</div>
+                <div>{{ $t('common.about') }}</div>
                 <i class="fa fa-angle-right" aria-hidden="true"></i>
               </div>
             </router-link>
           </li>
-          <li>
+          <li v-if="isMewCx">
             <router-link to="/#faqs" @click.native="isMenuOpen = false">
               <div class="menu-link-block">
                 <div>{{ $t('common.faqs') }}</div>
@@ -87,7 +92,7 @@
               class="menu-link-block"
               @click="langSelectorOpen = !langSelectorOpen"
             >
-              <div>{{ $t('common.language') }}</div>
+              <div>{{ $t('interface.language') }}</div>
               <div class="selected-lang">
                 <div>{{ currentLang }}</div>
                 <img
@@ -100,13 +105,13 @@
           </li>
           <li v-if="account.address">
             <div class="menu-link-block" @click="opensettings">
-              <div>{{ $t('common.settings') }}</div>
+              <div>{{ $t('interface.settings') }}</div>
               <i class="fa fa-angle-right" aria-hidden="true"></i>
             </div>
           </li>
         </ul>
         <div v-if="account.address" class="logout-button" @click="logout">
-          <button>{{ $t('common.logout') }}</button>
+          <button>{{ $t('interface.logout') }}</button>
         </div>
       </div>
     </div>
@@ -117,15 +122,15 @@
 <script>
 import { mapState } from 'vuex';
 import MobileMenuButton from './components/MobileMenuButton';
-import MobileAddressBlock from './components/MobileAddressBlock';
 import MobileBalanceBlock from './components/MobileBalanceBlock';
 import MobileNetworkBlock from './components/MobileNetworkBlock';
 import MobileLanguageSelector from './components/MobileLanguageSelector';
+import { Misc } from '@/helpers';
+import supportedLang from '../../supportedLang';
 
 export default {
   components: {
     'mobile-menu-button': MobileMenuButton,
-    'mobile-address-block': MobileAddressBlock,
     'mobile-balance-block': MobileBalanceBlock,
     'mobile-network-block': MobileNetworkBlock,
     'mobile-language-selector': MobileLanguageSelector
@@ -138,9 +143,14 @@ export default {
     logout: {
       type: Function,
       default: function() {}
+    },
+    buildType: {
+      type: String,
+      default: 'web'
     }
   },
   data() {
+    const isMewCx = Misc.isMewCx();
     return {
       localGasPrice: '10',
       balance: 0,
@@ -149,11 +159,13 @@ export default {
       isHomePage: true,
       langSelectorOpen: false,
       currentLang: 'English',
-      currentFlag: 'en'
+      currentFlag: 'en',
+      isMewCx: isMewCx,
+      supportedLanguages: supportedLang
     };
   },
   computed: {
-    ...mapState(['account', 'blockNumber'])
+    ...mapState('main', ['account', 'blockNumber', 'locale'])
   },
   watch: {
     $route(newVal) {
@@ -162,14 +174,28 @@ export default {
       } else {
         this.isHomePage = true;
       }
+    },
+    locale() {
+      this.getCurrentLang();
     }
   },
   mounted() {
+    this.getCurrentLang();
+
     window.onscroll = () => {
       this.onPageScroll();
     };
   },
   methods: {
+    getCurrentLang() {
+      const storedLocale = this.supportedLanguages.find(item => {
+        return item.langCode === this.locale;
+      });
+
+      this._i18n.locale = this.locale;
+      this.currentFlag = storedLocale.flag;
+      this.currentLang = storedLocale.name;
+    },
     langChange(data) {
       this.currentLang = data;
     },

@@ -2,7 +2,13 @@
   <div>
     <div>
       <div class="page-container">
-        <title-text-contents :options="titleAndTextContents" />
+        <page-title
+          :options="{
+            title: $t('team.title'),
+            boldSubTitle: '',
+            textContent: [$t('team.desc')]
+          }"
+        />
 
         <div class="team-info">
           <div v-for="member in members" :key="member.name" class="member">
@@ -19,7 +25,7 @@
 </template>
 
 <script>
-import TitleTextContentsLayout from '../InformationPages/Components/TitleTextContentsLayout';
+import PageTitleComponent from '@/components/PageTitleComponent';
 
 import kosala from '@/assets/images/team/Kosala.jpg';
 import brian from '@/assets/images/team/Brian.jpg';
@@ -32,7 +38,6 @@ import steve from '@/assets/images/team/Steve.jpg';
 import gage from '@/assets/images/team/Gage.jpg';
 import jack from '@/assets/images/team/Jack.jpg';
 import david from '@/assets/images/team/David.jpg';
-import samantha from '@/assets/images/team/Samantha.jpg';
 import alex from '@/assets/images/team/Alex.jpg';
 import misha from '@/assets/images/team/Misha.jpg';
 import katya from '@/assets/images/team/Katya.jpg';
@@ -40,15 +45,10 @@ import semaja from '@/assets/images/team/Semaja.jpg';
 
 export default {
   components: {
-    'title-text-contents': TitleTextContentsLayout
+    'page-title': PageTitleComponent
   },
   data() {
     return {
-      titleAndTextContents: {
-        title: this.$t('team.title'),
-        boldSubTitle: '',
-        textContent: [this.$t('team.desc')]
-      },
       members: [
         {
           name: 'Kosala',
@@ -124,11 +124,6 @@ export default {
           name: 'Katya',
           position: 'Community Advocate',
           img: katya
-        },
-        {
-          name: 'Samantha',
-          position: 'Communications and Media',
-          img: samantha
         }
       ]
     };

@@ -4,8 +4,6 @@ import clo from './clo';
 import egem from './egem';
 import ella from './ella';
 import esn from './esn';
-import etcethereumcommonwealthgeth from './etc-ethereumcommonwealth-geth';
-import etcethereumcommonwealthparity from './etc-ethereumcommonwealth-parity';
 import etcethereumclassiccooperativeparityclassic from './etc-ethereumclassiccooperative-parity-classic';
 import etcethereumclassiccooperativeparity from './etc-ethereumclassiccooperative-parity';
 import etcethereumclassiccooperativeparityws from './etc-ethereumclassiccooperative-parity-ws';
@@ -20,12 +18,15 @@ import go from './go';
 import kovethscan from './kov-ethscan';
 import kovinfura from './kov-infura';
 import kovpocket from './kov-pocket';
+import kovmew from './kov-mew';
 import kovmewws from './kov-mew-ws';
 import metadium from './meta';
 import music from './music';
 import pirl from './pirl';
 import poa from './poa';
 import poapocket from './poa-pocket';
+import rinmew from './rin-mew';
+import rinmewws from './rin-mew-ws';
 import rinethscan from './rin-ethscan';
 import rininfura from './rin-infura';
 import rinpocket from './rin-pocket';
@@ -33,23 +34,26 @@ import rininfuraws from './rin-infura-ws';
 import ropinfura from './rop-infura';
 import ropinfuraws from './rop-infura-ws';
 import ropmew from './rop-mew';
+import ropmewws from './rop-mew-ws';
 import roppocket from './rop-pocket';
 import rskpublic from './rsk-public';
 import rsktestpublic from './rsk-test-public';
 import tomo from './tomo';
 import ubq from './ubq';
-import goerli from './goerli-mew-ws';
+import goerlimew from './goerli-mew';
+import goerlimewws from './goerli-mew-ws';
 import goerlipocket from './goerli-pocket';
 import exp from './exp';
 import iolite from './iolite';
 import mix from './mix';
 import reosc from './reosc';
-import web from './web';
+import mintme from './mintme';
 import thundercore from './thundercore';
 import sum from './sum';
 import dexon from './dexon';
 import pht from './pht';
 import xero from './xero';
+import ere from './ere';
 
 export {
   akaremote,
@@ -58,8 +62,6 @@ export {
   egem,
   ella,
   esn,
-  etcethereumcommonwealthgeth,
-  etcethereumcommonwealthparity,
   etcethereumclassiccooperativeparityclassic,
   etcethereumclassiccooperativeparity,
   etcethereumclassiccooperativeparityws,
@@ -71,12 +73,14 @@ export {
   ethmewws,
   etho,
   exp,
-  goerli,
+  goerlimew,
+  goerlimewws,
   goerlipocket,
   go,
   iolite,
   kovethscan,
   kovinfura,
+  kovmew,
   kovmewws,
   kovpocket,
   metadium,
@@ -88,20 +92,24 @@ export {
   reosc,
   rinethscan,
   rininfura,
+  rinmew,
+  rinmewws,
   rininfuraws,
   rinpocket,
   ropinfura,
   ropinfuraws,
   roppocket,
   ropmew,
+  ropmewws,
   rskpublic,
   rsktestpublic,
   tomo,
   ubq,
-  web,
+  mintme,
   thundercore,
   sum,
   dexon,
   pht,
-  xero
+  xero,
+  ere
 };

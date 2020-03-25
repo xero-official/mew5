@@ -1,24 +1,44 @@
 <template>
   <div class="crypto-kitties-details">
     <div class="crypto-kitties-details-content-container">
-      <back-button @click.native="goBack" />
+      <back-button style="display: inline;" @click.native="goBack" />
+
       <div class="grid-container">
+        <div class="product-title-mobile mt-4">
+          <h3>{{ $t('nftManager.send-my', { value: selectedTitle }) }}</h3>
+          <p>#{{ nft.name }}</p>
+        </div>
+
         <div class="kitty-image">
           <img :src="getImage(nft)" alt />
         </div>
         <div class="kitty-text">
-          <h3>{{ $t('dapps.sendMy', { value: selectedTitle }) }}</h3>
-          <p>#{{ nft.token }}</p>
-          <div class="address-input-container">
-            <address-selector
-              :title="$t('interface.sendTxToAddr')"
+          <div v-if="canSend" class="product-title-desktop">
+            <h3>{{ $t('nftManager.send-my', { value: selectedTitle }) }}</h3>
+            <p>#{{ nft.name }}</p>
+          </div>
+          <div v-if="!canSend" class="product-title-desktop">
+            <h3>
+              {{ $t('nftManager.sending-disabled', { value: selectedTitle }) }}
+            </h3>
+            <p>#{{ nft.name }}</p>
+          </div>
+          <div v-if="canSend" class="address-input-container">
+            <dropdown-address-selector
+              :title="$t('sendTx.to-addr')"
               @toAddress="prepareTransfer"
             />
             <div class="send-button-container">
               <standard-button
                 :button-disabled="!isValidAddress"
-                :options="sendButton"
-                @click.native="transfer"
+                :options="{
+                  title: $t('sendTx.send'),
+                  buttonStyle: 'green',
+                  helpCenter: true,
+                  noMinWidth: true,
+                  fullWidth: true
+                }"
+                :click-function="transfer"
               />
             </div>
           </div>
@@ -30,18 +50,15 @@
 
 <script>
 import { mapState } from 'vuex';
-import { Misc, Toast } from '@/helpers';
-import InterfaceContainerTitle from '@/layouts/InterfaceLayout/components/InterfaceContainerTitle';
+import { Toast } from '@/helpers';
 import SmallBackButton from '@/layouts/InterfaceLayout/components/SmallBackButton';
 import DropDownAddressSelector from '@/components/DropDownAddressSelector';
 import StandardButton from '@/components/Buttons/StandardButton';
-import placeholderImage from '@/assets/images/icons/defaultToken.png';
 
 export default {
   components: {
-    'interface-container-title': InterfaceContainerTitle,
     'back-button': SmallBackButton,
-    'address-selector': DropDownAddressSelector,
+    'dropdown-address-selector': DropDownAddressSelector,
     'standard-button': StandardButton
   },
   props: {
@@ -64,6 +81,10 @@ export default {
       default: function() {
         return {};
       }
+    },
+    getImage: {
+      type: Function,
+      default: function() {}
     }
   },
   data() {
@@ -71,25 +92,19 @@ export default {
       toAddress: '',
       tokenContract: {},
       ERC721tokenContract: {},
+      ERC721SafeTransferFrom: {},
       cryptoKittiesContract: {},
       cryptoKittiesConfig: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
-      sendButton: {
-        title: this.$t('interface.send'),
-        buttonStyle: 'green',
-        helpCenter: false,
-        noMinWidth: true,
-        fullWidth: true
-      }
+      cannotSend: {
+        decentralland: '0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d'
+      },
+      isValidAddress: false
     };
   },
-
   computed: {
-    ...mapState(['account', 'web3']),
-    isValidAddress() {
-      if (this.toAddress !== '') {
-        return Misc.isValidENSorEtherAddress(this.toAddress);
-      }
-      return false;
+    ...mapState('main', ['account', 'web3']),
+    canSend() {
+      return !Object.values(this.cannotSend).includes(this.nft.contract);
     }
   },
   watch: {},
@@ -114,14 +129,9 @@ export default {
     ]);
   },
   methods: {
-    getImage(nft) {
-      if (nft.customNft) {
-        return placeholderImage;
-      }
-      return nft.image;
-    },
     prepareTransfer(toAddress) {
-      this.toAddress = toAddress;
+      this.toAddress = toAddress.address;
+      this.isValidAddress = toAddress.valid;
       this.ERC721tokenContract.options.address = this.nft.contract;
     },
     buildData() {
@@ -145,11 +155,12 @@ export default {
         ]);
 
         return this.cryptoKittiesContract.methods
-          .transfer(this.toAddress, this.nft.token)
+          .transfer(this.toAddress, this.nft.id)
           .encodeABI();
       }
+
       return this.ERC721tokenContract.methods
-        .transferFrom(this.account.address, this.toAddress, this.nft.token)
+        .transferFrom(this.account.address, this.toAddress, this.nft.id)
         .encodeABI();
     },
     transfer() {
@@ -160,12 +171,16 @@ export default {
           to: this.nft.contract,
           data: txData
         };
-        this.web3.eth.sendTransaction(raw).catch(err => {
-          Toast.responseHandler(err, Toast.ERROR);
-        });
-        this.$emit('nftTransfered', this.nft);
-
-        this.toAddress = '';
+        this.web3.eth
+          .sendTransaction(raw)
+          .on('transactionHash', () => {
+            this.$emit('nftTransferred', this.nft);
+            this.toAddress = '';
+          })
+          .catch(err => {
+            this.$emit('resetNFT', this.nft);
+            Toast.responseHandler(err, Toast.ERROR);
+          });
       }
     },
     goBack() {

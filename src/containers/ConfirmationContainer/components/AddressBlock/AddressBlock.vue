@@ -15,12 +15,17 @@
       </p>
     </div>
     <div class="identicon-container">
-      <p>{{ direction | capitalize }} Address</p>
+      <p v-if="direction === 'to'">{{ $t('sendTx.to-addr') }}</p>
+      <p v-else>{{ $t('sendTx.from-addr') }}</p>
     </div>
-    <div class="address">{{ checksumAddress }}</div>
+    <div class="address" @click="doubleCheckLink(checksumAddress)">
+      {{ checksumAddress }}
+    </div>
     <div v-if="tokenSymbol !== '' && direction === 'to'">
-      <p>Via contract</p>
-      <div class="address">{{ tokenChecksumAddress }}</div>
+      <p>{{ $t('sendTx.via-contract') }}</p>
+      <div class="address" @click="doubleCheckLink(tokenChecksumAddress)">
+        {{ tokenChecksumAddress }}
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +33,7 @@
 <script>
 import { isAddress, toChecksumAddress } from '@/helpers/addressUtils';
 import web3 from 'web3';
+import { mapState } from 'vuex';
 export default {
   props: {
     address: {
@@ -64,6 +70,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('main', ['network']),
     iconFetcher() {
       let icon;
       try {
@@ -91,6 +98,10 @@ export default {
   methods: {
     converter(num) {
       return web3.utils.fromWei(num.toString(), 'ether');
+    },
+    doubleCheckLink(address) {
+      // eslint-disable-next-line
+      window.open(this.network.type.blockExplorerAddr.replace('[[address]]', address), '_blank');
     }
   }
 };

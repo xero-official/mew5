@@ -1,6 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import Notification from '@/components/Notification/Notification.vue';
+import NotificationsContainer from '@/containers/NotificationsContainer/NotificationsContainer.vue';
 import { Tooling } from '@@/helpers';
+import Vuex from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
 const showModal = jest.fn();
 
@@ -13,17 +15,25 @@ const BModalStub = {
   }
 };
 
-describe('Notification.vue', () => {
+describe('NotificationsContainer.vue', () => {
   let localVue, i18n, wrapper, store;
   beforeAll(() => {
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new Vuex.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
   });
 
   beforeEach(() => {
-    wrapper = shallowMount(Notification, {
+    wrapper = shallowMount(NotificationsContainer, {
       localVue,
       i18n,
       store,
@@ -47,7 +57,7 @@ describe('Notification.vue', () => {
     expect(wrapper.find('.notification-no-item').isVisible()).toBe(true);
   });
 
-  describe('Notification.vue Methods', () => {
+  describe('NotificationsContainer.vue Methods', () => {
     it('should show notification when button click', () => {
       const notificationLogo = wrapper.find('.notification-logo');
       notificationLogo.trigger('click');

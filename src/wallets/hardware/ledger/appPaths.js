@@ -22,7 +22,8 @@ import {
   UBQ,
   TT,
   PHT,
-  XERO
+  XERO,
+  ERE
 } from '@/networks/types';
 import {
   ledgerEthereum,
@@ -50,10 +51,10 @@ import {
   rskTestnet,
   thundercore,
   lightstreamsNetwork,
-  xerom
+  xerom,
+  ethercore
 } from '../../bip44/paths';
-const appList = [
-  {
+const appList = [{
     network: ETH,
     prefixes: ["m/44'/60'"],
     paths: [ledgerEthereum, ledgerLiveEthereum]
@@ -172,6 +173,12 @@ const appList = [
     network: XERO,
     prefixes: ["m/44'/1313500'"],
     paths: [xerom]
+  },
+  {
+    network: ERE,
+    prefixes: ["m/44'/466'"],
+    paths: [ethercore]
+
   }
 ];
 export default appList;

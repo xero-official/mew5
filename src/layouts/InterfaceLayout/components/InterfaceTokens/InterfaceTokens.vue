@@ -6,14 +6,14 @@
         <div class="token-search">
           <div class="block-title">
             <div class="title-container">
-              <h4>{{ $t('interface.tokens') }}</h4>
+              <h4>{{ $tc('common.token', 2) }}</h4>
               <img
                 alt
                 src="~@/assets/images/icons/change.svg"
                 @click="fetchTokens"
               />
             </div>
-            <p @click="addTokenModal">+ {{ $t('interface.customToken') }}</p>
+            <p @click="addTokenModal">+ {{ $t('interface.tokens.custom') }}</p>
           </div>
           <div class="search-block">
             <input v-model="search" placeholder="Search" autocomplete="off" />
@@ -21,15 +21,15 @@
           </div>
         </div>
         <div v-show="!online" class="cant-load">
-          Can't load balances on offline mode
+          {{ $t('interface.tokens.warning-offline') }}
         </div>
         <div ref="tokenTableContainer" class="token-table-container">
           <table v-show="customTokens.length > 0 && receivedTokens">
             <tr
               v-for="(token, index) in customTokens"
-              :key="token.name + index"
+              :key="token.symbol + index"
             >
-              <td>{{ token.name }}</td>
+              <td>{{ token.symbol }}</td>
               <td>
                 {{ token.balance }}
                 <i
@@ -41,8 +41,11 @@
           </table>
 
           <table v-show="localTokens.length > 0 && receivedTokens">
-            <tr v-for="(token, index) in localTokens" :key="token.name + index">
-              <td>{{ token.name }}</td>
+            <tr
+              v-for="(token, index) in localTokens"
+              :key="token.symbol + index"
+            >
+              <td>{{ token.symbol }}</td>
               <td
                 v-if="token.balance === 'Load' && online"
                 class="load-token"
@@ -70,7 +73,7 @@
             "
             class="spinner-container"
           >
-            No tokens found :(
+            {{ $t('interface.tokens.no-tokens') }}
           </div>
         </div>
         <div
@@ -129,6 +132,14 @@ export default {
     resetTokenSelection: {
       type: Function,
       default: function() {}
+    },
+    ads: {
+      type: Boolean,
+      default: true
+    },
+    address: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -141,7 +152,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['network', 'web3', 'online'])
+    ...mapState('main', ['network', 'web3', 'online'])
   },
   watch: {
     receivedTokens() {
@@ -153,7 +164,6 @@ export default {
     },
     search(newVal) {
       this.assignTokens(this.tokens, newVal);
-      this.getCustomTokens();
     }
   },
   methods: {
@@ -195,6 +205,11 @@ export default {
       this.customTokens = storedTokens.hasOwnProperty(this.network.type.name)
         ? storedTokens[this.network.type.name]
         : [];
+      this.localCustomTokens = storedTokens.hasOwnProperty(
+        this.network.type.name
+      )
+        ? storedTokens[this.network.type.name]
+        : [];
     },
     async getSpecificTokenBalance(token) {
       for (let i = 0; i < this.tokens.length; i++) {
@@ -209,61 +224,72 @@ export default {
       this.resetTokenSelection();
     },
     addTokenModal() {
-      this.$refs.tokenModal.$refs.token.show();
+      this.$refs.tokenModal.$refs.tokenModal.show();
     },
     removeToken(idx) {
       const storedTokens = store.get('customTokens');
       this.customTokens.splice(idx, 1);
+      this.localCustomTokens = this.customTokens.splice();
       storedTokens[this.network.type.name] = this.customTokens;
       store.set('customTokens', storedTokens);
       this.fetchTokens();
     },
     searchBySymbol(symbol) {
-      const searchNetwork = this.localTokens.find(item => {
-        return item.symbol.toLowerCase() === symbol.toLowerCase();
-      });
+      try {
+        const searchNetwork = this.localTokens.find(item => {
+          return item.symbol.toLowerCase() === symbol.toLowerCase();
+        });
 
-      const searchCustom = this.customTokens.find(item => {
-        return item.symbol.toLowerCase() === symbol.toLowerCase();
-      });
+        const searchCustom = this.customTokens.find(item => {
+          return item.symbol.toLowerCase() === symbol.toLowerCase();
+        });
 
-      if (searchNetwork !== undefined || searchCustom !== undefined) {
-        return false;
+        if (searchNetwork !== undefined || searchCustom !== undefined) {
+          return false;
+        }
+        return true;
+      } catch (e) {
+        Toast.responseHandler('Search by symbol errored', Toast.ERROR);
+        return true;
       }
-      return true;
     },
     searchByAddr(addr) {
-      const searchNetwork = this.localTokens.find(item => {
-        return (
-          utils.toChecksumAddress(item.address) ===
-          utils.toChecksumAddress(addr)
-        );
-      });
+      try {
+        const searchNetwork = this.localTokens.find(item => {
+          return (
+            utils.toChecksumAddress(item.address) ===
+            utils.toChecksumAddress(addr)
+          );
+        });
 
-      const searchCustom = this.customTokens.find(item => {
-        return (
-          utils.toChecksumAddress(item.address) ===
-          utils.toChecksumAddress(addr)
-        );
-      });
+        const searchCustom = this.customTokens.find(item => {
+          return (
+            utils.toChecksumAddress(item.address) ===
+            utils.toChecksumAddress(addr)
+          );
+        });
 
-      if (searchNetwork !== undefined || searchCustom !== undefined) {
-        return false;
+        if (searchNetwork !== undefined || searchCustom !== undefined) {
+          return false;
+        }
+        return true;
+      } catch (e) {
+        Toast.responseHandler('Search by address errored', Toast.ERROR);
+        return true;
       }
-      return true;
     },
     tokenError(address, symbol, addType) {
       const findTokenBySymbol = this.searchBySymbol(symbol);
       const findTokenByAddr = this.searchByAddr(address);
       if (!findTokenByAddr && addType !== '') {
-        this.$refs.tokenModal.$refs.token.hide();
+        this.$refs.tokenModal.$refs.tokenModal.hide();
         Toast.responseHandler(
           'A default or custom token with this contract address already exists!',
           Toast.ERROR
         );
         return false;
       } else if (!findTokenBySymbol && addType !== '') {
-        this.$refs.tokenModal.$refs.token.hide();
+        this.$refs.tokenModal.$refs.tokenModal.hide();
         Toast.responseHandler(
           "A default or custom token with this symbol already exists! The token in our list may have the same symbol but a different contract address, try adding it again with a '2' after the symbol!",
           Toast.ERROR
@@ -283,15 +309,21 @@ export default {
           website: '',
           type: 'custom'
         };
+
+        token['balance'] = await this.getTokenBalance(token);
         const currentCustomToken = store.get('customTokens');
         this.customTokens =
           this.customTokens.length > 0 ? this.customTokens : [];
         this.customTokens.push(token);
+        this.localCustomTokens = this.customTokens.splice();
         currentCustomToken[this.network.type.name] = this.customTokens;
         store.set('customTokens', currentCustomToken);
-        this.$refs.tokenModal.$refs.token.hide();
+        this.$refs.tokenModal.$refs.tokenModal.hide();
         await this.fetchTokens();
-        Toast.responseHandler('Successfully added token!', Toast.SUCCESS);
+        Toast.responseHandler(
+          this.$t('interface.tokens.token-added-success'),
+          Toast.SUCCESS
+        );
       }
     },
     tokenListExpend() {
@@ -300,24 +332,26 @@ export default {
       this.$refs.expendUp.classList.toggle('hidden');
     },
     async assignTokens(arr, query) {
-      const oldArray = this.customTokens ? this.customTokens.slice() : [];
+      const localCustomTok =
+        this.customTokens.length > 0 ? this.customTokens.slice() : [];
       if (query !== '') {
-        this.customTokens = oldArray
+        this.customTokens = localCustomTok
           .filter(token => {
-            if (token.name.toLowerCase().includes(query.toLowerCase())) {
+            if (token.symbol.toLowerCase().includes(query.toLowerCase())) {
               return token;
             }
           })
           .sort(sortByBalance);
         this.localTokens = this.tokens
           .filter(token => {
-            if (token.name.toLowerCase().includes(query.toLowerCase())) {
+            if (token.symbol.toLowerCase().includes(query.toLowerCase())) {
               return token;
             }
           })
           .sort(sortByBalance);
       } else {
         this.localTokens = arr;
+        this.customTokens = this.localCustomTokens;
       }
     }
   }

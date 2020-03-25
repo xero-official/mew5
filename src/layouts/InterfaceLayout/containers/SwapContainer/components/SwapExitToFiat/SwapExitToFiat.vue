@@ -4,7 +4,7 @@
       <interface-container-title
         ><h3 @click="backButtonAction">
           <i class="fa fa-arrow-left"></i>
-          {{ $t('interface.back') }}
+          {{ $t('common.back') }}
         </h3></interface-container-title
       >
 
@@ -13,7 +13,7 @@
           <!-- Bank Details - accordion-menu ******************************** -->
           <accordion-menu
             :isopen="true"
-            :title="$t('interface.bankInfo')"
+            :title="$t('swap.exit-to-fiat.bank-info')"
             :greytitle="false"
             :editbutton="true"
             number="1"
@@ -21,17 +21,25 @@
           >
             <ul>
               <li v-if="previouslyVerified">
-                <p>{{ $t('interface.previouslyVerified') }}</p>
+                <p>{{ $t('swap.exit-to-fiat.prev-verified') }}</p>
               </li>
               <li>
                 <standard-input
-                  :options="inputIbanNumber"
+                  :options="{
+                    title: $t('swap.exit-to-fiat.iban-num'),
+                    popover: $t('swap.exit-to-fiat.popover-iban-num'),
+                    value: ''
+                  }"
                   @changedValue="orderDetails.iban = $event"
                 />
               </li>
               <li>
                 <standard-input
-                  :options="inputBicSwift"
+                  :options="{
+                    title: $t('swap.exit-to-fiat.bic-swift'),
+                    popover: $t('swap.exit-to-fiat.popover-bic-swift'),
+                    value: ''
+                  }"
                   @changedValue="orderDetails.bic_swift = $event"
                 />
               </li>
@@ -40,7 +48,7 @@
           <!-- Personal Details - accordion-menu ******************************** -->
           <accordion-menu
             :isopen="true"
-            :title="$t('interface.personalInfo')"
+            :title="$t('swap.exit-to-fiat.person-info')"
             :greytitle="false"
             :editbutton="true"
             number="2"
@@ -49,46 +57,72 @@
             <ul>
               <li>
                 <standard-input
-                  :options="inputName"
+                  :options="{
+                    title: $t('swap.exit-to-fiat.acc-owner-name'),
+                    value: ''
+                  }"
                   @changedValue="orderDetails.name = $event"
                 />
               </li>
               <li>
                 <standard-input
-                  :options="inputEmail"
+                  :options="{
+                    title: $t('swap.exit-to-fiat.email'),
+                    popover: $t('swap.exit-to-fiat.popover-email'),
+                    placeHolder: $t('swap.exit-to-fiat.email-placeholder'),
+                    value: ''
+                  }"
                   @changedValue="email = $event"
                 />
               </li>
               <li>
                 <div class="grid-billing-address">
                   <standard-input
-                    :options="inputAddress1"
+                    :options="{
+                      title: $t('swap.exit-to-fiat.billing-addr'),
+                      placeHolder: $t(
+                        'swap.exit-to-fiat.to-fiat.addr-placeholder'
+                      ),
+                      value: ''
+                    }"
                     class="address1"
                     @changedValue="orderDetails.address = $event"
                   />
                   <standard-input
-                    :options="inputAddress2"
+                    :options="{
+                      placeHolder: $t('swap.exit-to-fiat.addr-optional'),
+                      value: ''
+                    }"
                     class="address2"
                     @changedValue="orderDetails.address_complement = $event"
                   />
                   <standard-input
-                    :options="inputCity"
+                    :options="{
+                      placeHolder: $t('swap.exit-to-fiat.city'),
+                      value: ''
+                    }"
                     class="city"
                     @changedValue="orderDetails.city = $event"
                   />
                   <standard-input
-                    :options="inputState"
+                    :options="{
+                      placeHolder: $t('swap.exit-to-fiat.state'),
+                      value: ''
+                    }"
                     class="state"
                     @changedValue="orderDetails.state = $event"
                   />
                   <standard-input
-                    :options="inputZip"
+                    :options="{
+                      placeHolder: $t('swap.exit-to-fiat.zip-code'),
+                      value: ''
+                    }"
                     class="zip"
                     @changedValue="orderDetails.zip = $event"
                   />
                   <standard-dropdown
                     :options="countryOptions"
-                    :placeholder="$t('interface.country')"
+                    :placeholder="$t('swap.exit-to-fiat.country')"
                     :option-display-key="'1'"
                     :option-value-key="'0'"
                     class="country"
@@ -105,12 +139,19 @@
         <div class="button-container">
           <standard-button
             v-show="!finalizingSwap"
-            :options="button3"
+            :options="{
+              title: $t('swap.exit-to-fiat.button-submit'),
+              buttonStyle: 'green',
+              value: '',
+              noWalletTerms: true
+            }"
             :button-disabled="!canSwap"
-            @click.native="
-              updateStep('');
-              stageComplete('step2');
-              createExitOrder();
+            :click-function="
+              () => {
+                updateStep('');
+                stageComplete('step2');
+                createExitOrder();
+              }
             "
           />
           <div
@@ -118,7 +159,7 @@
             class="disabled submit-button large-round-button-green-filled clickable"
           >
             <i class="fa fa-spinner fa-spin" />
-            {{ $t('interface.swapButtonLoading') }}
+            {{ $t('swap.button-loading') }}
           </div>
         </div>
         <!-- .button-container -->
@@ -182,92 +223,6 @@ export default {
       steps: {
         step1: true,
         step2: false
-      },
-      inputCountryCode: {
-        title: this.$t('interface.countryCode'),
-        placeHolder: '000'
-      },
-      inputPhoneNumber: {
-        title: this.$t('interface.phoneNumber'),
-        placeHolder: '000-000-0000'
-      },
-      inputVerification: {
-        title: this.$t('interface.verificationCode'),
-        placeHolder: '000000'
-      },
-      inputBicSwift: {
-        title: this.$t('interface.bicSwiftCode'),
-        popover: this.$t('interface.bicSwiftPopOver'),
-        value: ''
-      },
-      inputAbaNumber: {
-        title: this.$t('interface.abaNumber'),
-        popover: this.$t('interface.abaPopOver'),
-        value: ''
-      },
-      inputIbanNumber: {
-        title: this.$t('interface.ibanNumber'),
-        popover: this.$t('interface.ibanPopOver'),
-        value: ''
-      },
-      inputName: {
-        title: this.$t('interface.ownerName'),
-        value: ''
-      },
-      inputEmail: {
-        title: this.$t('interface.email'),
-        popover: this.$t('interface.emailPopOver'),
-        placeHolder: 'user@example.com',
-        value: ''
-      },
-      inputAddress1: {
-        title: this.$t('interface.billingAddress'),
-        placeHolder: 'Address 1',
-        value: ''
-      },
-      inputAddress2: {
-        placeHolder: this.$t('interface.addressOptional'),
-        value: ''
-      },
-      inputCity: {
-        placeHolder: this.$t('interface.city'),
-        value: ''
-      },
-      inputState: {
-        placeHolder: this.$t('interface.state'),
-        value: ''
-      },
-      inputZip: {
-        placeHolder: this.$t('interface.zipCode'),
-        value: ''
-      },
-      inputCountry: {
-        placeHolder: this.$t('interface.country'),
-        value: ''
-      },
-      button1: {
-        title: this.$t('interface.send'),
-        buttonStyle: 'green',
-        value: '',
-        noWalletTerms: true
-      },
-      verifyButton: {
-        title: this.$t('interface.verify'),
-        buttonStyle: 'green',
-        value: '',
-        noWalletTerms: true
-      },
-      button2: {
-        title: this.$t('interface.continue'),
-        buttonStyle: 'green',
-        value: '',
-        noWalletTerms: true
-      },
-      button3: {
-        title: this.$t('interface.submit'),
-        buttonStyle: 'green',
-        value: '',
-        noWalletTerms: true
       },
       provider: {},
       countryCode: '',

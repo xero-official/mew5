@@ -2,10 +2,10 @@
   <div class="modal-container">
     <b-modal
       ref="confirmation"
+      :title="$t('sendTx.confirmation.title')"
       hide-footer
       centered
       class="bootstrap-modal-wide confirmation-modal nopadding"
-      title="Confirmation"
       static
       lazy
     >
@@ -37,11 +37,13 @@
         </div>
         <div class="detail-info">
           <div class="info">
-            <h4>Detail Information</h4>
+            <h4>{{ $t('sendTx.confirmation.detail-info') }}</h4>
             <div class="sliding-switch-white">
               <label class="switch">
                 <input
+                  ref="switchBox"
                   type="checkbox"
+                  :checked="modalDetailInformation"
                   @click="modalDetailInformation = !modalDetailInformation"
                 />
                 <span class="slider round" />
@@ -49,32 +51,38 @@
             </div>
           </div>
           <div
-            :class="modalDetailInformation && 'expended-info-open'"
+            :class="[modalDetailInformation ? 'expended-info-open' : '']"
             class="expended-info"
           >
             <div class="padding-container">
               <div class="grid-block">
-                <p>{{ $t('interface.network') }}</p>
-                <p>{{ network.type.name }} by {{ network.service }}</p>
+                <p>{{ $t('common.network') }}</p>
+                <p>
+                  {{ network.type.name }} {{ $t('common.by') }}
+                  {{ network.service }}
+                </p>
               </div>
               <div class="grid-block">
-                <p>{{ $t('common.gasLimit') }}</p>
-                <p>{{ gas }} wei</p>
+                <p>{{ $t('common.gas.limit') }}</p>
+                <p>{{ gas }} {{ $t('common.gas.wei') }}</p>
               </div>
               <div class="grid-block">
-                <p>{{ $t('common.gasPrice') }}</p>
-                <p>{{ gasPrice }} gwei</p>
+                <p>{{ $t('common.gas.price') }}</p>
+                <p>{{ gasPrice }} {{ $t('common.gas.gwei') }}</p>
+              </div>
+              <div v-if="showGasWarning" class="gas-price-warning">
+                {{ $t('errorsGlobal.high-gas-limit-warning') }}
               </div>
               <div class="grid-block">
-                <p>{{ $t('common.txFee') }}</p>
+                <p>{{ $t('sendTx.tx-fee') }}</p>
                 <p>{{ fee }} {{ network.type.currencyName }}</p>
               </div>
               <div class="grid-block">
-                <p>Nonce</p>
+                <p>{{ $t('sendTx.nonce') }}</p>
                 <p>{{ nonce }}</p>
               </div>
               <div class="grid-block">
-                <p>{{ $t('common.data') }}</p>
+                <p>{{ $t('sendTx.data') }}</p>
                 <p>{{ data }}</p>
               </div>
             </div>
@@ -83,9 +91,14 @@
 
         <div class="submit-button-container">
           <standard-button
-            :options="buttonSendTx"
+            :options="{
+              title: $t('sendTx.confirmation.button'),
+              buttonStyle: 'green',
+              mobileFullWidth: true,
+              helpCenter: true
+            }"
             :button-disabled="signedTx !== '' ? false : true"
-            @click.native="sendTx"
+            :click-function="sendTx"
           />
         </div>
       </div>
@@ -98,7 +111,7 @@ import AddressBlock from '../AddressBlock';
 import { mapState } from 'vuex';
 import StandardButton from '@/components/Buttons/StandardButton';
 import parseTokensData from '@/helpers/parseTokensData.js';
-
+const GAS_LIMIT_WARNING = 100;
 export default {
   components: {
     'address-block': AddressBlock,
@@ -156,24 +169,13 @@ export default {
       transactionSigned: false,
       tokenTransferTo: '',
       tokenTransferVal: '',
-      tokenSymbol: '',
-      buttonSendTx: {
-        title: 'Confirm and Send',
-        buttonStyle: 'green',
-        mobileFullWidth: true,
-        helpCenter: true
-      }
+      tokenSymbol: ''
     };
   },
   computed: {
-    ...mapState(['web3', 'network']),
-    signedTransaction() {
-      if (this.signedMessage) {
-        return this.signedMessage;
-      } else if (this.isHardwareWallet) {
-        return this.$t('confirmation.approveOnDevice');
-      }
-      return '';
+    ...mapState('main', ['web3', 'network']),
+    showGasWarning() {
+      return this.gasPrice >= GAS_LIMIT_WARNING;
     }
   },
   watch: {
@@ -185,6 +187,11 @@ export default {
     if (this.data !== '0x') {
       this.parseData();
     }
+    this.$refs.confirmation.$on('show', () => {
+      if (this.showGasWarning) {
+        this.modalDetailInformation = !this.modalDetailInformation;
+      }
+    });
   },
   methods: {
     sendTx() {

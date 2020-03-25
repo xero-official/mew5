@@ -19,7 +19,11 @@
           autocomplete="off"
         />
         <div class="address-end">
-          {{ address.substring(address.length - 4, address.length) }}
+          {{
+            address !== null && address !== ''
+              ? address.substring(address.length - 4, address.length)
+              : ''
+          }}
         </div>
         <div class="buttons-container">
           <button @click="openQrcode">
@@ -37,7 +41,7 @@
         </div>
       </div>
       <div v-if="hasMultipleAddr" class="bottom-block">
-        <button @click="switchAddr">{{ $t('common.changeAddress') }}</button>
+        <button @click="switchAddr">{{ $t('interface.change-addr') }}</button>
       </div>
     </div>
     <!-- .wrap -->
@@ -81,7 +85,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['account'])
+    ...mapState('main', ['account'])
   },
   mounted() {
     if (this.account.address !== null) {
@@ -101,7 +105,7 @@ export default {
     copy() {
       this.$refs.copyAddress.select();
       document.execCommand('copy');
-      Toast.responseHandler('Copied!', Toast.INFO);
+      Toast.responseHandler(this.$t('common.copied'), Toast.INFO);
     },
     openQrcode() {
       this.$refs.qrcode.$refs.addressQrcode.show();

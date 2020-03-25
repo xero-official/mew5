@@ -16,7 +16,7 @@ import {
   sanitizeHex,
   calculateChainIdFromV
 } from '../../utils';
-import { toBuffer } from 'ethereumjs-util';
+import { Misc } from '@/helpers';
 import errorHandler from './errorHandler';
 
 const NEED_PASSWORD = false;
@@ -61,7 +61,7 @@ class ledgerWallet {
     }
     const txSigner = async tx => {
       tx = new Transaction(tx, {
-        common: commonGenerator(store.state.network)
+        common: commonGenerator(store.state.main.network)
       });
       const networkId = tx.getChainId();
       tx.raw[6] = networkId;
@@ -100,7 +100,7 @@ class ledgerWallet {
     const msgSigner = async msg => {
       const result = await this.ledger.signPersonalMessage(
         accountPath,
-        toBuffer(msg).toString('hex')
+        Misc.toBuffer(msg).toString('hex')
       );
       const v = parseInt(result.v, 10) - 27;
       const vHex = sanitizeHex(v.toString(16));

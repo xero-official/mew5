@@ -2,7 +2,7 @@
   <div class="modal-container">
     <b-modal
       ref="print"
-      title="Print Preview"
+      :title="$t('createWallet.mnemonic.print.print-title')"
       hide-footer
       centered
       class="nopadding print-mod"
@@ -20,14 +20,15 @@
           <account-content-to-display :address="address" />
         </div>
         <div class="button-container">
-          <div class="print-button" @click="print">Print</div>
+          <div class="print-button" @click="print">
+            {{ $t('popover.print') }}
+          </div>
         </div>
       </div>
     </b-modal>
   </div>
 </template>
 <script>
-import Blockie from '@/components/Blockie';
 import printJS from 'print-js';
 import html2canvas from 'html2canvas';
 import AccountContentToDisplay from './components/AccountContentToDisplay';
@@ -35,7 +36,6 @@ import AccountContentToPrint from './components/AccountContentToPrint';
 
 export default {
   components: {
-    blockie: Blockie,
     'account-content-to-display': AccountContentToDisplay,
     'account-content-to-print': AccountContentToPrint
   },
